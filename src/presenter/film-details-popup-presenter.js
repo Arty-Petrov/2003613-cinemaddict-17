@@ -19,32 +19,38 @@ export default class FilmsDetailsPopupPresenter {
 
   filmDetailsTopContainer = new FilmDetailsTopContainerView();
   filmDetailsCloseButton = new FilmDetailsCloseButtonView();
-  filmDetailsInfoWrap = new FilmDetailsInfoWrapView();
   filmDetailsControls = new FilmDetailsControlsView();
 
   filmDetailsBottomContainer = new FilmDetailsBottomContainerView();
-  filmDetailsCommentsWrap = new FilmDetailsCommentsWrapView();
   filmDetailsCommentsList = new FilmDetailsCommentsListView();
   filmDetailsNewComment = new FilmDetailsNewCommentView();
 
-
-  init = (filmDetailsContainer) => {
+  init = (filmDetailsContainer, filmsModel, commentsModel, filmId) => {
     this.filmDetailsContainer = filmDetailsContainer;
+    this.filmId = filmId;
+    this.filmsModel = filmsModel;
+    this.filmDetailsContent = this.filmsModel.films[this.filmId];
+    this.commentsModel = commentsModel;
+    this.commentsList = [... this.commentsModel.comments];
+    this.commentsSet = this.commentsList[this.filmId];
+
+    this.commentsCount = this.commentsSet.length;
+    this.filmDetailsCommentsWrap = new FilmDetailsCommentsWrapView(this.commentsCount);
 
     render(this.filmDetails, this.filmDetailsContainer, RenderPosition.AFTEREND);
     render(this.filmDetailsInner, this.filmDetails.getElement());
 
     render(this.filmDetailsTopContainer, this.filmDetailsInner.getElement());
     render(this.filmDetailsCloseButton, this.filmDetailsTopContainer.getElement());
-    render(this.filmDetailsInfoWrap, this.filmDetailsTopContainer.getElement());
+    render(new FilmDetailsInfoWrapView(this.filmDetailsContent), this.filmDetailsTopContainer.getElement());
     render(this.filmDetailsControls, this.filmDetailsTopContainer.getElement());
 
     render(this.filmDetailsBottomContainer, this.filmDetailsInner.getElement());
     render(this.filmDetailsCommentsWrap, this.filmDetailsBottomContainer.getElement());
     render(this.filmDetailsCommentsList, this.filmDetailsCommentsWrap.getElement());
 
-    for (let i = 0; i < 5; i++) {
-      render(new FilmDetailsCommentView(), this.filmDetailsCommentsList.getElement());
+    for (const el of this.commentsList) {
+      render(new FilmDetailsCommentView(el), this.filmDetailsCommentsList.getElement());
     }
 
     render(this.filmDetailsNewComment, this.filmDetailsCommentsWrap.getElement());
