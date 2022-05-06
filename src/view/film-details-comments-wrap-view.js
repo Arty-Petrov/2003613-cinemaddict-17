@@ -1,14 +1,19 @@
 import { createElement } from '../render.js';
 
-const createFilmDetailsCommentsWrapTemplate = () => (
-  `<section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Co
+const createFilmDetailsCommentsWrapTemplate = (commentsCount) => (
+  ` <section class="film-details__comments-wrap">
+  <h3 class="film-details__comments-title">Comments 
+  <span class="film-details__comments-count">${commentsCount}</span></h3>
   </section>`
 );
 
 export default class FilmDetailsCommentsWrapView {
+  constructor(commentsCount) {
+    this.commentsCount = commentsCount;
+  }
+
   getTemplate() {
-    return createFilmDetailsCommentsWrapTemplate();
+    return createFilmDetailsCommentsWrapTemplate(this.commentsCount);
   }
 
   getElement() {
