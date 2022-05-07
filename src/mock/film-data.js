@@ -13,7 +13,7 @@ const Title = [
 ];
 const TotalRatings = ['8.3', '3.2', '9.0', '2.3', '6.3', '5.8', '8.9'];
 const ReleaseYears = ['1929', '1933', '1955', '1964', '1936', '1939', '1945'];
-const Durations = ['1h 55m', '54m', '1h 59m', '1h 21m', '16m', '1h 32m', '1h 18m'];
+const Durations = ['115', '54', '119', '81', '16', '92', '78'];
 const Genres = ['Musical', 'Western', 'Drama', 'Comedy', 'Cartoon', 'Mystery'];
 const Posters = [
   'the-dance-of-life.jpg',

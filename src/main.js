@@ -14,6 +14,7 @@ const filmsCataloguePresenter = new FilmsCataloguePresenter();
 const filmsDetailsPopupPresenter = new FilmsDetailsPopupPresenter();
 const filmsModel = new FilmsModel();
 const commentsModel = new CommentsModel();
+
 const FILM_ID = 5;
 
 render (new HeaderProfileView(), siteHeaderElement);

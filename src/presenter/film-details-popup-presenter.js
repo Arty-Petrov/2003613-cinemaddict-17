@@ -13,45 +13,58 @@ import { render, RenderPosition } from '../render.js';
 
 
 export default class FilmsDetailsPopupPresenter {
-  filmDetails = new FilmDetailsView();
+  #filmDetails = new FilmDetailsView();
 
-  filmDetailsInner = new FilmDetailsInnerView();
+  #filmDetailsInner = new FilmDetailsInnerView();
 
-  filmDetailsTopContainer = new FilmDetailsTopContainerView();
-  filmDetailsCloseButton = new FilmDetailsCloseButtonView();
-  filmDetailsControls = new FilmDetailsControlsView();
+  #filmDetailsTopContainer = new FilmDetailsTopContainerView();
+  #filmDetailsCloseButton = new FilmDetailsCloseButtonView();
+  #filmDetailsControls = new FilmDetailsControlsView();
 
-  filmDetailsBottomContainer = new FilmDetailsBottomContainerView();
-  filmDetailsCommentsList = new FilmDetailsCommentsListView();
-  filmDetailsNewComment = new FilmDetailsNewCommentView();
+  #filmDetailsBottomContainer = new FilmDetailsBottomContainerView();
+  #filmDetailsCommentsList = new FilmDetailsCommentsListView();
+  #filmDetailsNewComment = new FilmDetailsNewCommentView();
+
+  #filmDetailsContainer = null;
+  #filmId = null;
+  #filmsModel = null;
+  #commentsModel = null;
+  #filmDetailsContent = null;
+  #commentsList = null;
+  #commentsSet = null;
+  #commentsCount = null;
+  #filmDetailsCommentsWrap = null;
 
   init = (filmDetailsContainer, filmsModel, commentsModel, filmId) => {
-    this.filmDetailsContainer = filmDetailsContainer;
-    this.filmId = filmId;
-    this.filmsModel = filmsModel;
-    this.filmDetailsContent = this.filmsModel.films[this.filmId];
-    this.commentsModel = commentsModel;
-    this.commentsList = [... this.commentsModel.comments];
-    this.commentsSet = this.commentsList[this.filmId];
-    this.commentsCount = this.commentsSet.length;
-    this.filmDetailsCommentsWrap = new FilmDetailsCommentsWrapView(this.commentsCount);
+    this.#filmDetailsContainer = filmDetailsContainer;
+    this.#filmId = filmId;
+    this.#filmsModel = filmsModel;
+    this.#filmDetailsContent = this.#filmsModel.films[this.#filmId];
+    this.#commentsModel = commentsModel;
+    this.#commentsList = [... this.#commentsModel.comments];
+    this.#commentsSet = this.#commentsList[this.#filmId];
+    this.#commentsCount = this.#commentsSet.length;
+    this.#filmDetailsCommentsWrap = new FilmDetailsCommentsWrapView(this.#commentsCount);
 
-    render(this.filmDetails, this.filmDetailsContainer, RenderPosition.AFTEREND);
-    render(this.filmDetailsInner, this.filmDetails.getElement());
+    render(this.#filmDetails, this.#filmDetailsContainer, RenderPosition.AFTEREND);
+    render(this.#filmDetailsInner, this.#filmDetails.element);
 
-    render(this.filmDetailsTopContainer, this.filmDetailsInner.getElement());
-    render(this.filmDetailsCloseButton, this.filmDetailsTopContainer.getElement());
-    render(new FilmDetailsInfoWrapView(this.filmDetailsContent), this.filmDetailsTopContainer.getElement());
-    render(this.filmDetailsControls, this.filmDetailsTopContainer.getElement());
+    render(this.#filmDetailsTopContainer, this.#filmDetailsInner.element);
+    render(this.#filmDetailsCloseButton, this.#filmDetailsTopContainer.element);
+    render(new FilmDetailsInfoWrapView(this.#filmDetailsContent), this.#filmDetailsTopContainer.element);
+    render(this.#filmDetailsControls, this.#filmDetailsTopContainer.element);
 
-    render(this.filmDetailsBottomContainer, this.filmDetailsInner.getElement());
-    render(this.filmDetailsCommentsWrap, this.filmDetailsBottomContainer.getElement());
-    render(this.filmDetailsCommentsList, this.filmDetailsCommentsWrap.getElement());
+    render(this.#filmDetailsBottomContainer, this.#filmDetailsInner.element);
+    render(this.#filmDetailsCommentsWrap, this.#filmDetailsBottomContainer.element);
+    render(this.#filmDetailsCommentsList, this.#filmDetailsCommentsWrap.element);
 
-    for (const el of this.commentsList) {
-      render(new FilmDetailsCommentView(el), this.filmDetailsCommentsList.getElement());
-    }
+    this.#commentsList.forEach((el) => this.#renderComment(el));
 
-    render(this.filmDetailsNewComment, this.filmDetailsCommentsWrap.getElement());
+    render(this.#filmDetailsNewComment, this.#filmDetailsCommentsWrap.element);
+  };
+
+  #renderComment = (commentDetails) => {
+    const commentComponent = new FilmDetailsCommentView(commentDetails);
+    render(commentComponent, this.#filmDetailsCommentsList.element);
   };
 }

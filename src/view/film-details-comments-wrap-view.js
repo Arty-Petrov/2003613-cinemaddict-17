@@ -8,23 +8,24 @@ const createFilmDetailsCommentsWrapTemplate = (commentsCount) => (
 );
 
 export default class FilmDetailsCommentsWrapView {
+  #element = null;
+
   constructor(commentsCount) {
     this.commentsCount = commentsCount;
   }
 
-  getTemplate() {
+  get template() {
     return createFilmDetailsCommentsWrapTemplate(this.commentsCount);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
-
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
