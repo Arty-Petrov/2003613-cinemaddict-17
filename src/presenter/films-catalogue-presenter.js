@@ -1,4 +1,3 @@
-
 import FilmsView from '../view/films-view';
 import FilmsListView from '../view/films-list-view';
 import FilmListContainerView from '../view/films-list-container-view';
@@ -20,9 +19,7 @@ export default class FilmsCataloguePresenter {
     render(this.filmsList, this.filmsSection.getElement());
     render(this.filmListContainer, this.filmsList.getElement());
 
-    for (let i = 0; i < this.filmsCatalogue.length; i++) {
-      render(new FilmCardView(this.filmsCatalogue[i]), this.filmListContainer.getElement());
-    }
+    this.filmsCatalogue.forEach((el) => render(new FilmCardView(el), this.filmListContainer.getElement()));
 
     render(new FilmListShowMoreButtonView(), this.filmsSection.getElement());
   };

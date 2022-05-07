@@ -14,11 +14,11 @@ const filmsCataloguePresenter = new FilmsCataloguePresenter();
 const filmsDetailsPopupPresenter = new FilmsDetailsPopupPresenter();
 const filmsModel = new FilmsModel();
 const commentsModel = new CommentsModel();
-const filmId = 5;
+const FILM_ID = 5;
 
 render (new HeaderProfileView(), siteHeaderElement);
 render (new MainNavigationView(), siteMainElement);
 render (new MainSortView(), siteMainElement);
 
 filmsCataloguePresenter.init(siteMainElement, filmsModel);
-filmsDetailsPopupPresenter.init(siteFooterElement, filmsModel, commentsModel, filmId);
+filmsDetailsPopupPresenter.init(siteFooterElement, filmsModel, commentsModel, FILM_ID);
