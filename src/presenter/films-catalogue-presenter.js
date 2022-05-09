@@ -1,4 +1,5 @@
-import FilmsView from '../view/films-view';
+import FilmsListView from '../view/films-list-view';
+import FilmsListEmptyView from '../view/films-lsit-empty-view';
 import FilmsListShowMoreButtonView from '../view/films-list-show-more-button-view';
 import FilmCardView from '../view/film-card-view';
 import FilmDetailsView from '../view/film-details-view';
@@ -13,32 +14,24 @@ const BLOCK_SCROLL_CLASS = 'hide-overflow';
 
 export default class FilmsCataloguePresenter {
   #filmsContainer = null;
-  #filmsCatalogue = new FilmsView();
+  #filmsListShowMoreButton = null;
+  #filmsList = null;
+  #filmListEmpty = null;
 
   #filmsModel = null;
   #filmsData = [];
-  #filmsDataForStep = [];
+  #renderedFilmsCount = FILMS_COUNT_PER_STEP;
 
   init = (filmsContainer) => {
     this.#filmsContainer = filmsContainer;
+    this.#filmsList = new FilmsListView();
     this.#filmsModel = new FilmsModel();
+    this.#filmListEmpty = new FilmsListEmptyView();
     this.#filmsData = [...this.#filmsModel.films];
+    this.#filmsListShowMoreButton = new FilmsListShowMoreButtonView();
 
-    render(this.#filmsCatalogue, this.#filmsContainer);
-
-    this.#filmsDataForStep = this.#filmsData.slice(FILMS_COUNT_PER_STEP);
-    this.#filmsDataForStep.forEach((el) => this.#renderFilmCard(el));
-
-    render(new FilmsListShowMoreButtonView(), this.#filmsCatalogue.element);
-  };
-
-  #renderFilmCard = (filmDetails) => {
-    const filmCardComponent = new FilmCardView(filmDetails);
-    render(filmCardComponent, this.#filmsCatalogue.container);
-    filmCardComponent.showFilmDetailsButton.addEventListener('click', () => {this.#renderFilmDetails(filmDetails);});
-    filmCardComponent.markAsWhatchedButton.addEventListener('click', () => {});
-    filmCardComponent.addToWatchListButton.addEventListener('click', () => {});
-    filmCardComponent.markAsFavoriteButton.addEventListener('click', () => {});
+    render(this.#filmsList, this.#filmsContainer);
+    this.#renderFilmCards();
   };
 
   #toggleBlockScroll = () => {
@@ -50,6 +43,27 @@ export default class FilmsCataloguePresenter {
     }
   };
 
+  #renderFilmCard = (filmDetails) => {
+    const filmCardComponent = new FilmCardView(filmDetails);
+    render(filmCardComponent, this.#filmsList.container);
+    filmCardComponent.showFilmDetailsButton.addEventListener('click', () => {this.#renderFilmDetails(filmDetails);});
+    filmCardComponent.markAsWhatchedButton.addEventListener('click', () => {});
+    filmCardComponent.addToWatchListButton.addEventListener('click', () => {});
+    filmCardComponent.markAsFavoriteButton.addEventListener('click', () => {});
+  };
+
+  #renderFilmCards = () => {
+    if (this.#filmsData.length === 0) {
+      render(this.#filmListEmpty, this.#filmsList.container);
+    } else {
+      for (let i = 0; i < Math.min(this.#filmsData.length, FILMS_COUNT_PER_STEP); i++) {
+        this.#renderFilmCard(this.#filmsData[i]);
+      }
+      render(this.#filmsListShowMoreButton, this.#filmsList.element);
+      this.#filmsListShowMoreButton.element.addEventListener('click',this.#loadMoreButtonHandler);
+    }
+  };
+
   #renderFilmDetails = (filmDetails) => {
     if (this.filmDetailsPopup){
       this.#removePopup();
@@ -58,6 +72,7 @@ export default class FilmsCataloguePresenter {
     const filmCommentsData = this.#getfilmCommentsData(filmDetails);
     const filmDetailsNewComment = new FilmDetailsNewCommentView();
     this.filmDetailsPopup = new FilmDetailsView(filmDetails);
+
     this.#toggleBlockScroll();
     render(this.filmDetailsPopup, filmDetailsContainer);
     filmCommentsData.forEach((el) => render(new FilmDetailsCommentView(el), this.filmDetailsPopup.commentsContainer));
@@ -76,6 +91,7 @@ export default class FilmsCataloguePresenter {
 
   #removePopup = () => {
     this.filmDetailsPopup.element.remove();
+    this.filmDetailsPopup.removeElement();
     this.#toggleBlockScroll();
   };
 
@@ -83,5 +99,19 @@ export default class FilmsCataloguePresenter {
     const filmId = filmDetails.id;
     const commentsData = new CommentsModel();
     return [...commentsData.comments[filmId]];
+  };
+
+  #loadMoreButtonHandler = (evt) => {
+    evt.preventDefault();
+    this.#filmsData
+      .slice(this.#renderedFilmsCount, this.#renderedFilmsCount + FILMS_COUNT_PER_STEP)
+      .forEach((film) => this.#renderFilmCard(film));
+
+    this.#renderedFilmsCount += FILMS_COUNT_PER_STEP;
+
+    if (this.#renderedFilmsCount >= this.#filmsData.length) {
+      this.#filmsListShowMoreButton.element.remove();
+      this.#filmsListShowMoreButton.removeElement();
+    }
   };
 }

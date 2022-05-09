@@ -1,5 +1,5 @@
-import { createElement } from '../render.js';
-import { convertMinutesToHM, cutStringLength, humanizeUTC } from '../util.js';
+import { createElement } from '../render';
+import { convertMinutesToHM, cutStringLength, humanizeUTC } from '../util';
 
 const DESCRIPTION_LENGTH_LIMIT = 140;
 

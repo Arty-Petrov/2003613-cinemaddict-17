@@ -1,5 +1,5 @@
-import { createElement } from '../render.js';
-import { humanizeUTC } from '../util.js';
+import { createElement } from '../render';
+import { humanizeUTC } from '../util';
 import { CommentEmotion } from '../enum';
 
 const EMOTION_PATH = './images/emoji/';
