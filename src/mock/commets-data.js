@@ -1,5 +1,4 @@
 import { getRandomArrayItem, getRandomPositiveInteger } from '../util';
-import { CommentEmotion } from '../enum';
 
 const AuthorsList = ['Ilya O\'Reilly', 'Tim Macoveev', 'John Doe',];
 const CommentsList = [
@@ -10,6 +9,7 @@ const CommentsList = [
   'Almost two hours? Seriously?',
 
 ];
+const CommentEmotion = ['smile', 'sleeping', 'puke', 'angry'];
 
 export const generateComment = (filmId) => Array.from({length: getRandomPositiveInteger(1, 5)}, () =>
   ({
