@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export const getRandomPositiveInteger = (a, b) => {
   const lower = Math.ceil(Math.min(Math.abs(a), Math.abs(b)));
   const upper = Math.floor(Math.max(Math.abs(a), Math.abs(b)));
@@ -42,7 +44,9 @@ export const cutStringLength = (string, length) => {
 
 export const convertMinutesToHM = (minutes) => {
   const hours = Number(minutes / 60).toFixed(0);
-  const hoursString = (hours) ? `${hours}H` : '';
-  const minutesString = minutes % 60;
+  const hoursString = (hours > 0) ? `${hours}h` : '';
+  const minutesString = `${minutes % 60}m`;
   return `${hoursString} ${minutesString}`;
 };
+
+export const humanizeUTC = (date, format) => dayjs(date).format(format);
