@@ -35,40 +35,36 @@ const createFilmCardTemplate = (film) => {
         <p class="film-card__description">${cutStringLength(description, DESCRIPTION_LENGTH_LIMIT)}</p>
         <span class="film-card__comments">${comments.length} ${(comments.length === 1) ? 'comment': 'comments'}</span>
       </a>
-      <div class="film-card__controls">
-        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-        <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
-        <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
-      </div>
+      <div class="film-card__controls"></div>
     </article>`
   );
 };
 
 export default class FilmCardView extends AbstractView {
   #film = null;
+  #showFilmDetailsClickArea = null;
 
   constructor(film) {
     super();
     this.#film = film;
+    this.#showFilmDetailsClickArea = this.element.querySelector('.film-card__link');
   }
 
   get template() {
     return createFilmCardTemplate(this.#film);
   }
 
-  get showFilmDetailsButton() {
-    return this.element.querySelector('.film-card__link');
+  get controlsContainer() {
+    return this.element.querySelector('.film-card__controls');
   }
 
-  get addToWatchListButton() {
-    return this.element.querySelector('.film-card__controls-item--add-to-watchlist');
-  }
+  setClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.#showFilmDetailsClickArea.addEventListener('click', this.#clickHandler);
+  };
 
-  get markAsWhatchedButton() {
-    return this.element.querySelector('.film-card__controls-item--mark-as-watched');
-  }
-
-  get markAsFavoriteButton() {
-    return this.element.querySelector('.film-card__controls-item--favorite');
-  }
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
 }
