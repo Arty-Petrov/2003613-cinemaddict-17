@@ -1,6 +1,5 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { convertMinutesToHM, humanizeUTC } from '../util';
-
 
 const createFilmDetailsTemplate = (filmDetails) => {
   const {
@@ -110,10 +109,9 @@ const createFilmDetailsTemplate = (filmDetails) => {
       </form>
     </section>`);
 };
-export default class FilmDetailsView {
-  #element = null;
-
+export default class FilmDetailsView extends AbstractView {
   constructor(filmDetails) {
+    super();
     this.filmDetails = filmDetails;
   }
 
@@ -121,26 +119,15 @@ export default class FilmDetailsView {
     return createFilmDetailsTemplate(this.filmDetails);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
-
   get closeButton() {
-    return this.#element.querySelector('.film-details__close-btn');
+    return this.element.querySelector('.film-details__close-btn');
   }
 
   get commentsContainer() {
-    return this.#element.querySelector('.film-details__comments-list');
+    return this.element.querySelector('.film-details__comments-list');
   }
 
   get newCommentContainer() {
-    return this.#element.querySelector('.film-details__comments-wrap');
-  }
-
-  removeElement() {
-    this.#element = null;
+    return this.element.querySelector('.film-details__comments-wrap');
   }
 }

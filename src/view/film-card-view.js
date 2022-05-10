@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { convertMinutesToHM, cutStringLength, humanizeUTC } from '../util';
 
 const DESCRIPTION_LENGTH_LIMIT = 140;
@@ -44,11 +44,11 @@ const createFilmCardTemplate = (film) => {
   );
 };
 
-export default class FilmCardView {
-  #element = null;
+export default class FilmCardView extends AbstractView {
   #film = null;
 
   constructor(film) {
+    super();
     this.#film = film;
   }
 
@@ -56,26 +56,19 @@ export default class FilmCardView {
     return createFilmCardTemplate(this.#film);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
-
   get showFilmDetailsButton() {
-    return this.#element.querySelector('.film-card__link');
+    return this.element.querySelector('.film-card__link');
   }
 
   get addToWatchListButton() {
-    return this.#element.querySelector('.film-card__controls-item--add-to-watchlist');
+    return this.element.querySelector('.film-card__controls-item--add-to-watchlist');
   }
 
   get markAsWhatchedButton() {
-    return this.#element.querySelector('.film-card__controls-item--mark-as-watched');
+    return this.element.querySelector('.film-card__controls-item--mark-as-watched');
   }
 
   get markAsFavoriteButton() {
-    return this.#element.querySelector('.film-card__controls-item--favorite');
+    return this.element.querySelector('.film-card__controls-item--favorite');
   }
 }

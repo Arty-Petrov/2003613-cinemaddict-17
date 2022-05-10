@@ -7,7 +7,7 @@ import FilmDetailsCommentView from '../view/film-details-comment-view';
 import FilmDetailsNewCommentView from '../view/film-details-new-comment-view';
 import FilmsModel from '../model/films-model';
 import CommentsModel from '../model/comments-model';
-import { render } from '../render';
+import { render } from '../framework/render';
 
 const FILMS_COUNT_PER_STEP = 5;
 const BLOCK_SCROLL_CLASS = 'hide-overflow';
