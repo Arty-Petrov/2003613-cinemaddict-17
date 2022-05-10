@@ -1,5 +1,5 @@
-import { createElement } from '../render.js';
-import { convertMinutesToHM, humanizeUTC } from '../util.js';
+import { createElement } from '../render';
+import { convertMinutesToHM, humanizeUTC } from '../util';
 
 
 const createFilmDetailsTemplate = (filmDetails) => {
