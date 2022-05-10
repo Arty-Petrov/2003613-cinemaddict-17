@@ -1,3 +1,5 @@
+export const DATA_LENGTH = 30;
+
 export const CommentEmotion = {
   smile: {
     img: 'smile.png',
