@@ -1,13 +1,23 @@
 import FilmsListView from '../view/films-list-view';
 import FilmsListEmptyView from '../view/films-lsit-empty-view';
 import FilmsListShowMoreButtonView from '../view/films-list-show-more-button-view';
+
 import FilmCardView from '../view/film-card-view';
+import FilmCardMarkAsWhatchedButtonView from '../view/film-card-mark-as-whatched-button-view';
+import FilmCardAddToWatchListButtonView from '../view/film-card-add-to-watch-list-button-view';
+import FilmCardAddToFavoriteButtonView from '../view/film-card-add-to-favorite-button-view';
+
 import FilmDetailsView from '../view/film-details-view';
+import FilmDetailsCloseButtonView from '../view/film-details-close-button-view';
+import FilmDetailsMarkAsWhatchedButtonView from '../view/film-details-mark-as-whatched-button-view';
+import FilmDetailsAddToWatchListButtonView from '../view/film-details-add-to-watch-list-button-view';
+import FilmDetailsAddToFavoriteButtonView from '../view/film-details-add-to-favorite-button-view';
 import FilmDetailsCommentView from '../view/film-details-comment-view';
 import FilmDetailsNewCommentView from '../view/film-details-new-comment-view';
+
 import FilmsModel from '../model/films-model';
 import CommentsModel from '../model/comments-model';
-import { render } from '../render';
+import { render } from '../framework/render';
 
 const FILMS_COUNT_PER_STEP = 5;
 const BLOCK_SCROLL_CLASS = 'hide-overflow';
@@ -25,8 +35,8 @@ export default class FilmsCataloguePresenter {
   init = (filmsContainer) => {
     this.#filmsContainer = filmsContainer;
     this.#filmsList = new FilmsListView();
-    this.#filmsModel = new FilmsModel();
     this.#filmListEmpty = new FilmsListEmptyView();
+    this.#filmsModel = new FilmsModel();
     this.#filmsData = [...this.#filmsModel.films];
     this.#filmsListShowMoreButton = new FilmsListShowMoreButtonView();
 
@@ -44,12 +54,21 @@ export default class FilmsCataloguePresenter {
   };
 
   #renderFilmCard = (filmDetails) => {
+    this.filmDetails = filmDetails;
     const filmCardComponent = new FilmCardView(filmDetails);
+    const filmCardAddToWatchListButton = new FilmCardAddToWatchListButtonView();
+    const filmCardMarkAsWhatchedButton = new FilmCardMarkAsWhatchedButtonView();
+    const filmCardMarkAsFavoriteButton = new FilmCardAddToFavoriteButtonView();
     render(filmCardComponent, this.#filmsList.container);
-    filmCardComponent.showFilmDetailsButton.addEventListener('click', () => {this.#renderFilmDetails(filmDetails);});
-    filmCardComponent.markAsWhatchedButton.addEventListener('click', () => {});
-    filmCardComponent.addToWatchListButton.addEventListener('click', () => {});
-    filmCardComponent.markAsFavoriteButton.addEventListener('click', () => {});
+
+    render(filmCardAddToWatchListButton , filmCardComponent.controlsContainer);
+    render(filmCardMarkAsWhatchedButton, filmCardComponent.controlsContainer);
+    render(filmCardMarkAsFavoriteButton, filmCardComponent.controlsContainer);
+
+    filmCardComponent.setClickHandler(() => this.#renderFilmDetails(filmDetails));
+    filmCardAddToWatchListButton.setClickHandler(this.#addToWatchListHandler);
+    filmCardMarkAsWhatchedButton.setClickHandler(this.#markAsWhatchedHandler);
+    filmCardMarkAsFavoriteButton.setClickHandler(this.#markAsFavoriteHandler);
   };
 
   #renderFilmCards = () => {
@@ -60,7 +79,7 @@ export default class FilmsCataloguePresenter {
         this.#renderFilmCard(this.#filmsData[i]);
       }
       render(this.#filmsListShowMoreButton, this.#filmsList.element);
-      this.#filmsListShowMoreButton.element.addEventListener('click',this.#loadMoreButtonHandler);
+      this.#filmsListShowMoreButton.setClickHandler(this.#showMoreButtonHandler);
     }
   };
 
@@ -68,31 +87,35 @@ export default class FilmsCataloguePresenter {
     if (this.filmDetailsPopup){
       this.#removePopup();
     }
-    const filmDetailsContainer = document.body;
-    const filmCommentsData = this.#getfilmCommentsData(filmDetails);
-    const filmDetailsNewComment = new FilmDetailsNewCommentView();
     this.filmDetailsPopup = new FilmDetailsView(filmDetails);
+    const filmDetailsContainer = document.body;
+    const filmDetailsCloseButton = new FilmDetailsCloseButtonView();
+    const filmDetailsAddToWatchListButton = new FilmDetailsAddToWatchListButtonView();
+    const filmDetailsMarkAsWhatchedButton = new FilmDetailsMarkAsWhatchedButtonView();
+    const filmDetailsMarkAsFavoriteButton = new FilmDetailsAddToFavoriteButtonView();
+    const filmDetailsNewComment = new FilmDetailsNewCommentView();
+
+    const filmCommentsData = this.#getfilmCommentsData(filmDetails);
 
     this.#toggleBlockScroll();
     render(this.filmDetailsPopup, filmDetailsContainer);
-    filmCommentsData.forEach((el) => render(new FilmDetailsCommentView(el), this.filmDetailsPopup.commentsContainer));
+    render(filmDetailsCloseButton, this.filmDetailsPopup.closeButtonContainer);
+    render(filmDetailsAddToWatchListButton, this.filmDetailsPopup.controlsContainer);
+    render(filmDetailsMarkAsWhatchedButton, this.filmDetailsPopup.controlsContainer);
+    render(filmDetailsMarkAsFavoriteButton, this.filmDetailsPopup.controlsContainer);
+
+    filmCommentsData.forEach((el) => render(
+      new FilmDetailsCommentView(el),
+      this.filmDetailsPopup.commentsContainer)
+    );
+
     render(filmDetailsNewComment, this.filmDetailsPopup.newCommentContainer);
 
-    this.filmDetailsPopup.closeButton.addEventListener('click', this.#closePopupHandler);
-    document.addEventListener('keydown', this.#closePopupHandler);
-  };
-
-  #closePopupHandler = (evt) => {
-    if (evt.type === 'click' || evt.code === 'Escape'){
-      this.#removePopup();
-      document.removeEventListener('keydown', this.#closePopupHandler);
-    }
-  };
-
-  #removePopup = () => {
-    this.filmDetailsPopup.element.remove();
-    this.filmDetailsPopup.removeElement();
-    this.#toggleBlockScroll();
+    filmDetailsCloseButton.setClickHandler(this.#closePopupHandler);
+    document.addEventListener('keydown', this.#escKeydownHandler);
+    filmDetailsAddToWatchListButton.setClickHandler(this.#addToWatchListHandler);
+    filmDetailsMarkAsWhatchedButton.setClickHandler(this.#markAsWhatchedHandler);
+    filmDetailsMarkAsFavoriteButton.setClickHandler(this.#markAsFavoriteHandler);
   };
 
   #getfilmCommentsData = (filmDetails) => {
@@ -101,8 +124,33 @@ export default class FilmsCataloguePresenter {
     return [...commentsData.comments[filmId]];
   };
 
-  #loadMoreButtonHandler = (evt) => {
-    evt.preventDefault();
+  #closePopupHandler = () => {
+    this.#removePopup();
+  };
+
+  #escKeydownHandler = (evt) => {
+    if (evt.key === 'Esc' || evt.code === 'Escape'){
+      this.#removePopup();
+    }
+  };
+
+  #markAsWhatchedHandler = () => {
+  };
+
+  #addToWatchListHandler = () => {
+  };
+
+  #markAsFavoriteHandler = () => {
+  };
+
+  #removePopup = () => {
+    this.filmDetailsPopup.element.remove();
+    this.filmDetailsPopup.removeElement();
+    this.#toggleBlockScroll();
+    document.removeEventListener('keydown', this.#escKeydownHandler);
+  };
+
+  #showMoreButtonHandler = () => {
     this.#filmsData
       .slice(this.#renderedFilmsCount, this.#renderedFilmsCount + FILMS_COUNT_PER_STEP)
       .forEach((film) => this.#renderFilmCard(film));

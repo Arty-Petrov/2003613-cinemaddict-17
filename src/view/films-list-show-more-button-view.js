@@ -1,24 +1,9 @@
-import { createElement } from '../render';
+import AbstractButtonView from './abstract-button-view';
 
-const createFilmsListShowMoreButtonTemplate = () => (
-  '<button class="films-list__show-more">Show more</button>'
-);
+const createFilmsListShowMoreButtonTemplate = () => '<button class="films-list__show-more">Show more</button>';
 
-export default class FilmsListShowMoreButtonView {
-  #element = null;
-
+export default class FilmsListShowMoreButtonView extends AbstractButtonView {
   get template() {
     return createFilmsListShowMoreButtonTemplate();
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

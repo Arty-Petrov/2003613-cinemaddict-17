@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { humanizeUTC } from '../util';
 import { CommentEmotion } from '../enum';
 
@@ -29,26 +29,15 @@ const createFilmDetailsCommentTemplate = (commentsData) => {
   );
 };
 
-export default class FilmDetailsCommentView {
-  #element = null;
+export default class FilmDetailsCommentView extends AbstractView {
   #commentData = null;
 
   constructor(commentData) {
+    super();
     this.#commentData = commentData;
   }
 
   get template() {
     return createFilmDetailsCommentTemplate(this.#commentData);
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }
