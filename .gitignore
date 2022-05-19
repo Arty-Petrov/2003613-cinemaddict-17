@@ -8,6 +8,7 @@ Thumbs.db
 .vscode
 
 # Вспомогательные файлы
+*.uxf*
 *.log*
 node_modules/
 

@@ -1,7 +1,7 @@
 import AbstractView from '../framework/view/abstract-view';
 import { convertMinutesToHM, humanizeUTC } from '../util';
 
-const createFilmDetailsTemplate = (filmDetails) => {
+const createFilmDetailsTemplate = (filmData) => {
   const {
     comments,
     filmInfo : {
@@ -20,8 +20,13 @@ const createFilmDetailsTemplate = (filmDetails) => {
       runtime,
       genre,
       description
-    }
-  } = filmDetails;
+    },
+    userDetails: {
+      watchlist,
+      alreadyWatched,
+      favorite,
+    },
+  } = filmData;
 
   const genreString = (genre.length === 1) ? 'Genre' : 'Genres';
 
@@ -33,12 +38,14 @@ const createFilmDetailsTemplate = (filmDetails) => {
     return genresList.join('\n');
   };
 
+  const getControlActivityClass = (userDetail) => (userDetail) ? 'film-details__control-button--active' : '';
+
   return (
     `<section class="film-details">
       <form class="film-details__inner" action="" method="get">
         <div class="film-details__top-container">
           <div class="film-details__close">
-          
+            <button class="film-details__close-btn" type="button">close</button>
           </div>
           <div class="film-details__info-wrap">
           <div class="film-details__poster">
@@ -91,12 +98,13 @@ const createFilmDetailsTemplate = (filmDetails) => {
             </table>
 
             <p class="film-details__film-description">${description}</p>
+            </div>
           </div>
-        </div>
+      
           <section class="film-details__controls">
-            
-            
-            
+            <button type="button" class="film-details__control-button ${getControlActivityClass(watchlist)} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
+            <button type="button" class="film-details__control-button ${getControlActivityClass(alreadyWatched)} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
+            <button type="button" class="film-details__control-button ${getControlActivityClass(favorite)} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
           </section>
         </div>
 
@@ -111,26 +119,25 @@ const createFilmDetailsTemplate = (filmDetails) => {
 };
 
 export default class FilmDetailsView extends AbstractView {
-  #markAsWhatchedButton = null;
+  #filmData = null;
+  #closePopupButton = null;
   #addToWatchListButton = null;
-  #showFilmDetailsButton = null;
+  #markAsWhatchedButton = null;
   #markAsFavoriteButton = null;
+  #controlActivityClass = null;
 
-  constructor(filmDetails) {
+  constructor(filmData) {
     super();
-    this.filmDetails = filmDetails;
+    this.#filmData = filmData;
+    this.#closePopupButton = this.element.querySelector('.film-details__close-btn');
+    this.#addToWatchListButton = this.element.querySelector('.film-details__control-button--watchlist');
+    this.#markAsWhatchedButton = this.element.querySelector('.film-details__control-button--watched');
+    this.#markAsFavoriteButton = this.element.querySelector('.film-details__control-button--favorite');
+    this.#controlActivityClass = 'film-details__control-button--active';
   }
 
   get template() {
-    return createFilmDetailsTemplate(this.filmDetails);
-  }
-
-  get closeButtonContainer() {
-    return this.element.querySelector('.film-details__close');
-  }
-
-  get controlsContainer() {
-    return this.element.querySelector('.film-details__controls');
+    return createFilmDetailsTemplate(this.#filmData);
   }
 
   get commentsContainer() {
@@ -140,4 +147,64 @@ export default class FilmDetailsView extends AbstractView {
   get newCommentContainer() {
     return this.element.querySelector('.film-details__comments-wrap');
   }
+
+  #updateButtonStatus (element, status) {
+    if (status) {
+      element.classList.add(this.#controlActivityClass);
+    } else {
+      element.classList.remove(this.#controlActivityClass);
+    }
+  }
+
+  setAddToWatchList(buttonStatus) {
+    this.#updateButtonStatus(this.#addToWatchListButton, buttonStatus);
+  }
+
+  setMarkAsWhatched(buttonStatus) {
+    this.#updateButtonStatus(this.#markAsWhatchedButton, buttonStatus);
+  }
+
+  setMarkAsFavorite(buttonStatus) {
+    this.#updateButtonStatus(this.#markAsFavoriteButton, buttonStatus);
+  }
+
+  setCloseButtonHandler(callback) {
+    this._callback.closePopupButtonClick = callback;
+    this.#closePopupButton.addEventListener('click', this.#closeButtonHandler);
+  }
+
+  setAddToWatchListHandler(callback) {
+    this._callback.addToWatchListClick = callback;
+    this.#addToWatchListButton.addEventListener('click', this.#addToWatchListHandler);
+  }
+
+  setMarkAsWhatchedHandler(callback) {
+    this._callback.markAsWhatchedClick = callback;
+    this.#markAsWhatchedButton.addEventListener('click', this.#markAsWhatchedHandler);
+  }
+
+  setMarkAsFavoriteHandler(callback) {
+    this._callback.markAsFavoriteClick = callback;
+    this.#markAsFavoriteButton.addEventListener('click', this.#markAsFavoriteHandler);
+  }
+
+  #closeButtonHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.closePopupButtonClick();
+  };
+
+  #addToWatchListHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.addToWatchListClick();
+  };
+
+  #markAsWhatchedHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.markAsWhatchedClick();
+  };
+
+  #markAsFavoriteHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.markAsFavoriteClick();
+  };
 }
