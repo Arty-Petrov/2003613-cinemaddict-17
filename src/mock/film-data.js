@@ -1,5 +1,9 @@
 import dayjs from 'dayjs';
-import { getRandomArrayItem, getRandomArrayPart } from '../util';
+import {
+  getRandomArrayItem,
+  getRandomArrayPart,
+  getRandomPositiveInteger,
+} from '../util';
 
 const Title = [
   'The Dance of Life',
@@ -32,42 +36,36 @@ const Descriptions = [
   'In this short, Sindbad the Sailor (presumably Bluto playing a \'role\') proclaims himself, in song, to be the greatest sailor, adventurer and…',
   'John Mason (James Stewart) is a young, somewhat timid attorney in New York City. He has been doing his job well, and he has a chance of bei…',
   'The film opens following a murder at a cabaret in Mexico City in 1936, and then presents the events leading up to it in flashback. The Grea…',
-  'Oscar-winning film, a war drama about two young people, from the creators of timeless classic \'Nu, Pogodi!\' and \'Alice in Wonderland\', with the best fight scenes since Bruce Lee.'
+  'Oscar-winning film, a war drama about two young people, from the creators of timeless classic \'Nu, Pogodi!\' and \'Alice in Wonderland\', with the best fight scenes since Bruce Lee.',
 ];
 const AgeRatings = ['18+', '16+', '6+', '0+'];
 
-export const generateFilm = (filmId) => (
-  {
-    id: filmId,
-    comments: [
-      '$Comment.id$', '$Comment.id$'
-    ],
-    filmInfo: {
-      title: getRandomArrayItem(Title),
-      alternativeTitle: '',
-      totalRating: getRandomArrayItem(TotalRatings),
-      poster: `images/posters/${getRandomArrayItem(Posters)}`,
-      ageRating: getRandomArrayItem(AgeRatings),
-      director: 'Tom Ford',
-      writers: [
-        'Takeshi Kitano'
-      ],
-      actors: [
-        'Morgan Freeman'
-      ],
-      release: {
-        date:  dayjs(getRandomArrayItem(ReleaseYears)).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
-        releaseCountry: 'Finland'
-      },
-      runtime: getRandomArrayItem(Durations),
-      genre: getRandomArrayPart(Genres),
-      description: getRandomArrayItem(Descriptions)
+export const generateFilm = (filmId) => ({
+  id: filmId,
+  comments: ['$Comment.id$', '$Comment.id$'],
+  filmInfo: {
+    title: getRandomArrayItem(Title),
+    alternativeTitle: '',
+    totalRating: getRandomArrayItem(TotalRatings),
+    poster: `images/posters/${getRandomArrayItem(Posters)}`,
+    ageRating: getRandomArrayItem(AgeRatings),
+    director: 'Tom Ford',
+    writers: ['Takeshi Kitano'],
+    actors: ['Morgan Freeman'],
+    release: {
+      date: dayjs(getRandomArrayItem(ReleaseYears)).format(
+        'YYYY-MM-DDTHH:mm:ss.SSS[Z]'
+      ),
+      releaseCountry: 'Finland',
     },
-    userDetails: {
-      watchlist: false,
-      alreadyWatched: true,
-      watchingDate: '2019-04-12T16:12:32.554Z',
-      favorite: false,
-    },
-  }
-);
+    runtime: getRandomArrayItem(Durations),
+    genre: getRandomArrayPart(Genres),
+    description: getRandomArrayItem(Descriptions),
+  },
+  userDetails: {
+    watchlist: `${getRandomPositiveInteger(0, 1)}`,
+    alreadyWatched: `${getRandomPositiveInteger(0, 1)}`,
+    watchingDate: '2019-04-12T16:12:32.554Z',
+    favorite: `${getRandomPositiveInteger(0, 1)}`,
+  },
+});
