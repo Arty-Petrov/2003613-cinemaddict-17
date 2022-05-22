@@ -1,6 +1,6 @@
 import FilmCardView from '../view/film-card-view';
 import FilmDetailsPresenter from './film-details-presenter';
-import { render } from '../framework/render';
+import { render, replace, remove } from '../framework/render';
 
 export default class FilmCardPresenter {
   #filmId = null;
@@ -9,22 +9,33 @@ export default class FilmCardPresenter {
 
   #filmCardContainer = null;
   #filmCardComponent = null;
+  #existFilmCardComponent = null;
 
   #filmDetailsPopupComponent = null;
 
-  constructor(filmCardContainer) {
+  constructor(filmCardContainer, callback) {
     this.#filmCardContainer = filmCardContainer;
+    this.#updateUserDetails = callback;
   }
 
-  init =  (filmData, callback) => {
+  init =  (filmData) => {
     this.#filmData = filmData;
-    this.#updateUserDetails = callback;
     this.#filmCardComponent = new FilmCardView(this.#filmData);
     this.#filmCardComponent.setShowFilmDetailsHandler(this.#handleShowFilmDetail);
     this.#filmCardComponent.setAddToWatchListHandler(this.#handleAddToWatchList);
     this.#filmCardComponent.setMarkAsWhatchedHandler(this.#handleMarkAsWhatched);
     this.#filmCardComponent.setMarkAsFavoriteHandler(this.#handleMarkAsFavorite);
-    render (this.#filmCardComponent, this.#filmCardContainer);
+
+    if (this.#existFilmCardComponent === null){
+      render (this.#filmCardComponent, this.#filmCardContainer);
+      return;
+    }
+
+    if (this.filmCardContainer.contains(this.#existFilmCardComponent.element)){
+      replace(this.#filmCardComponent,this.#existFilmCardComponent);
+    }
+
+    remove(this.#existFilmCardComponent);
   };
 
   #handleShowFilmDetail = () => {
@@ -78,7 +89,6 @@ export default class FilmCardPresenter {
   };
 
   destroy = () => {
-    this.#filmCardComponent.element.remove();
-    this.#filmCardComponent.removeElement();
+    remove(this.#filmCardComponent);
   };
 }

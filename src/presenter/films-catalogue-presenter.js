@@ -1,5 +1,8 @@
+/* eslint-disable indent */
+import dayjs from 'dayjs';
 import FilmsModel from '../model/films-model';
 import { generateFilter } from '../mock/filter.js';
+import { SortType } from '../enum';
 
 import HeaderProfileView from '../view/header-profile-view';
 import MainNavigationView from '../view/main-navigation-view';
@@ -26,7 +29,11 @@ export default class FilmsCataloguePresenter {
   #filmsModel = null;
   #filmsData = null;
   #filmsFilters = null;
+  #filmsDataSource = null;
+  #currentSortType = SortType.DEFAULT;
+  #renderedFilms = new Map();
   #renderedFilmsCount = FILMS_COUNT_PER_STEP;
+
 
   init = () => {
     this.#filmsModel = new FilmsModel();
@@ -43,18 +50,22 @@ export default class FilmsCataloguePresenter {
     this.#filmsList = new FilmsListView();
     this.#filmListEmpty = new FilmsListEmptyView();
     this.#showMoreButton = new ShowMoreButtonPresenter();
+    this.#filmsModel = new FilmsModel();
+    this.#filmsData = [...this.#filmsModel.films];
+    this.#filmsDataSource = [...this.#filmsModel.films];
 
     render(this.#profileMenu, this.#profileMenuContainer);
     render(this.#navigationMenu, this.#filmsContainer);
-    render(this.#filmsSortMenu, this.#filmsContainer);
+    this.#renderFilmsSortMenu();
 
     render(this.#filmsList, this.#filmsContainer);
     this.#renderFilmCards();
   };
 
   #renderFilmCard = (filmData) => {
-    const filmCardComponent = new FilmCardPresenter(this.#filmsList.container);
-    filmCardComponent.init(filmData, this.updateUserDetails);
+    const filmCardComponent = new FilmCardPresenter(this.#filmsList.container, this.#updateUserDetails);
+    filmCardComponent.init(filmData);
+    this.#renderedFilms.set(filmData.id, filmCardComponent);
   };
 
   #renderFilmCards = () => {
@@ -66,6 +77,11 @@ export default class FilmsCataloguePresenter {
       }
       this.#showMoreButton.init(this.#filmsList.element, this.#handleShowMoreButton);
     }
+  };
+
+  #renderFilmsSortMenu = () => {
+    render(this.#filmsSortMenu, this.#filmsContainer);
+    this.#filmsSortMenu.setSortTypeChangeHandler(this.#handleSortTypeChange);
   };
 
   #handleShowMoreButton = () => {
@@ -80,7 +96,46 @@ export default class FilmsCataloguePresenter {
     }
   };
 
-  updateUserDetails = (filmId, dataToUpdate) => {
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+    this.#currentSortType = sortType;
+    this.#sortFilmsList(sortType);
+    this.#cleanUpFilmsList();
+    this.#renderFilmCards();
+  };
+
+  #sortFilmsList = (sortType) => {
+    switch (sortType) {
+      case SortType.DATE:
+        this.#sortByDate();
+        break;
+      case SortType.RATING:
+        this.#sortByRating();
+        break;
+      default:
+        this.#filmsData = [...this.#filmsDataSource];
+  }
+};
+
+  #sortByDate = () => {
+    this.#filmsData.sort((a, b) => dayjs(a.filmInfo.release.date).isBefore(dayjs(b.filmInfo.release.date)));
+  };
+
+  #sortByRating = () => {
+    this.#filmsData
+    .sort((a, b) => parseFloat(b.filmInfo.totalRating) - parseFloat(a.filmInfo.totalRating));
+  };
+
+  #cleanUpFilmsList = () => {
+    this.#renderedFilms.forEach((presenter) => presenter.destroy());
+    this.#renderedFilms.clear();
+    this.#renderedFilmsCount = FILMS_COUNT_PER_STEP;
+    this.#showMoreButton.destroy();
+  };
+
+  #updateUserDetails = (filmId, dataToUpdate) => {
     for (const key in dataToUpdate) {
       this.#filmsData[filmId][key] = dataToUpdate[key];
     }
