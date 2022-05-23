@@ -1,4 +1,4 @@
-import { getRandomArrayItem, getRandomPositiveInteger } from '../util';
+import { getRandomArrayItem, getRandomPositiveInteger } from '../utils/util';
 
 const AuthorsList = ['Ilya O\'Reilly', 'Tim Macoveev', 'John Doe',];
 const CommentsList = [

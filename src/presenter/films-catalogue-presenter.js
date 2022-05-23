@@ -1,4 +1,5 @@
 import FilmsModel from '../model/films-model';
+import { generateFilter } from '../mock/filter.js';
 
 import HeaderProfileView from '../view/header-profile-view';
 import MainNavigationView from '../view/main-navigation-view';
@@ -23,22 +24,25 @@ export default class FilmsCataloguePresenter {
   #filmListEmpty = null;
 
   #filmsModel = null;
-  #filmsData = [];
+  #filmsData = null;
+  #filmsFilters = null;
   #renderedFilmsCount = FILMS_COUNT_PER_STEP;
 
   init = () => {
+    this.#filmsModel = new FilmsModel();
+    this.#filmsData = [...this.#filmsModel.films];
+    this.#filmsFilters = generateFilter(this.#filmsData);
+
     this.#profileMenuContainer = document.querySelector('.header');
     this.#filmsContainer = document.querySelector('main');
 
-    this.#profileMenu = new HeaderProfileView();
-    this.#navigationMenu = new MainNavigationView();
+    this.#profileMenu = new HeaderProfileView(this.#filmsFilters);
+    this.#navigationMenu = new MainNavigationView(this.#filmsFilters);
     this.#filmsSortMenu = new MainSortView();
 
     this.#filmsList = new FilmsListView();
     this.#filmListEmpty = new FilmsListEmptyView();
     this.#showMoreButton = new ShowMoreButtonPresenter();
-    this.#filmsModel = new FilmsModel();
-    this.#filmsData = [...this.#filmsModel.films];
 
     render(this.#profileMenu, this.#profileMenuContainer);
     render(this.#navigationMenu, this.#filmsContainer);
@@ -81,4 +85,8 @@ export default class FilmsCataloguePresenter {
       this.#filmsData[filmId][key] = dataToUpdate[key];
     }
   };
+
+  get filmCount() {
+    return this.#filmsData.length;
+  }
 }

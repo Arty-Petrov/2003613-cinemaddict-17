@@ -29,3 +29,27 @@ export const NotFoundError = {
   message: 'Not found',
 };
 
+export const FilterType = {
+  ALL: 'all',
+  WATCHLIST: 'watchlist',
+  HISTORY: 'history',
+  FAVORITES: 'favorites',
+};
+
+export const UserRank = [
+  {
+    rankName: 'Novice',
+    watchedMin: 1,
+    watchedMax: 10,
+  },
+  {
+    rankName: 'Fan',
+    watchedMin: 11,
+    watchedMax: 20,
+  },
+  {
+    rankName: 'Movie Buff',
+    watchedMin: 21,
+    watchedMax: Infinity,
+  },
+];

@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
-import { convertMinutesToHM, cutStringLength, humanizeUTC } from '../util';
+import { convertMinutesToHM, cutStringLength, humanizeUTC } from '../utils/util';
 
 const DESCRIPTION_LENGTH_LIMIT = 140;
 

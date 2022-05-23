@@ -1,4 +1,3 @@
-
 import FilmCardView from '../view/film-card-view';
 import FilmDetailsPresenter from './film-details-presenter';
 import { render } from '../framework/render';

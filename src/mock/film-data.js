@@ -3,7 +3,7 @@ import {
   getRandomArrayItem,
   getRandomArrayPart,
   getRandomPositiveInteger,
-} from '../util';
+} from '../utils/util';
 
 const Title = [
   'The Dance of Life',
@@ -63,9 +63,9 @@ export const generateFilm = (filmId) => ({
     description: getRandomArrayItem(Descriptions),
   },
   userDetails: {
-    watchlist: `${getRandomPositiveInteger(0, 1)}`,
-    alreadyWatched: `${getRandomPositiveInteger(0, 1)}`,
+    watchlist: getRandomPositiveInteger(0, 1),
+    alreadyWatched: getRandomPositiveInteger(0, 1),
     watchingDate: '2019-04-12T16:12:32.554Z',
-    favorite: `${getRandomPositiveInteger(0, 1)}`,
+    favorite: getRandomPositiveInteger(0, 1),
   },
 });

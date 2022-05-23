@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
-import { convertMinutesToHM, humanizeUTC } from '../util';
+import { convertMinutesToHM, humanizeUTC } from '../utils/util';
 
 const createFilmDetailsTemplate = (filmData) => {
   const {
