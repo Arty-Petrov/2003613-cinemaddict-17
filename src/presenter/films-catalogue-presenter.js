@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 import dayjs from 'dayjs';
 import FilmsModel from '../model/films-model';
 import { generateFilter } from '../mock/filter.js';
@@ -7,6 +6,7 @@ import { SortType } from '../enum';
 import HeaderProfileView from '../view/header-profile-view';
 import MainNavigationView from '../view/main-navigation-view';
 import MainSortView from '../view/main-sort-view';
+import FooterStatisticsView from '../view/footer-statistics-view';
 
 import FilmsListView from '../view/films-list-view';
 import FilmsListEmptyView from '../view/films-list-empty-view';
@@ -20,6 +20,8 @@ export default class FilmsCataloguePresenter {
   #profileMenuContainer = null;
   #profileMenu = null;
   #navigationMenu = null;
+  #footerStatisticsContainer = null;
+  #footerStatisticsContent = null;
   #filmsSortMenu = null;
   #filmsContainer = null;
   #filmsList = null;
@@ -42,10 +44,12 @@ export default class FilmsCataloguePresenter {
 
     this.#profileMenuContainer = document.querySelector('.header');
     this.#filmsContainer = document.querySelector('main');
+    this.#footerStatisticsContainer = document.querySelector('.footer__statistics');
 
     this.#profileMenu = new HeaderProfileView(this.#filmsFilters);
     this.#navigationMenu = new MainNavigationView(this.#filmsFilters);
     this.#filmsSortMenu = new MainSortView();
+    this.#footerStatisticsContent = new FooterStatisticsView(this.#filmsCount() );
 
     this.#filmsList = new FilmsListView();
     this.#filmListEmpty = new FilmsListEmptyView();
@@ -57,8 +61,9 @@ export default class FilmsCataloguePresenter {
     render(this.#profileMenu, this.#profileMenuContainer);
     render(this.#navigationMenu, this.#filmsContainer);
     this.#renderFilmsSortMenu();
-
+    render(this.#footerStatisticsContent, this.#footerStatisticsContainer);
     render(this.#filmsList, this.#filmsContainer);
+
     this.#renderFilmCards();
   };
 
@@ -116,8 +121,8 @@ export default class FilmsCataloguePresenter {
         break;
       default:
         this.#filmsData = [...this.#filmsDataSource];
-  }
-};
+    }
+  };
 
   #sortByDate = () => {
     this.#filmsData.sort((a, b) => dayjs(a.filmInfo.release.date).isBefore(dayjs(b.filmInfo.release.date)));
@@ -125,7 +130,7 @@ export default class FilmsCataloguePresenter {
 
   #sortByRating = () => {
     this.#filmsData
-    .sort((a, b) => parseFloat(b.filmInfo.totalRating) - parseFloat(a.filmInfo.totalRating));
+      .sort((a, b) => parseFloat(b.filmInfo.totalRating) - parseFloat(a.filmInfo.totalRating));
   };
 
   #cleanUpFilmsList = () => {
@@ -141,7 +146,5 @@ export default class FilmsCataloguePresenter {
     }
   };
 
-  get filmCount() {
-    return this.#filmsData.length;
-  }
+  #filmsCount = () => this.#filmsData.length;
 }

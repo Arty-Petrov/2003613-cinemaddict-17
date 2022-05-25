@@ -21,7 +21,7 @@ export default class MainSortView extends AbstractView {
   }
 
   #sortTypeChangeHandler = (evt) => {
-    if (evt.target.tagName !== 'A'){
+    if (!evt.target.classList.contains('sort__button')){
       return;
     }
 
