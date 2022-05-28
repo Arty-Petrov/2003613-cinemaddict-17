@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import FilmsModel from '../model/films-model';
+import CommentsModel from '../model/comments-model';
 import { generateFilter } from '../mock/filter.js';
 import { SortType } from '../enum';
 
@@ -30,6 +31,8 @@ export default class FilmsCataloguePresenter {
 
   #filmsModel = null;
   #filmsData = null;
+  #commentsModel = null;
+  #commentsData = null;
   #filmsFilters = null;
   #filmsDataSource = null;
   #currentSortType = SortType.DEFAULT;
@@ -40,6 +43,8 @@ export default class FilmsCataloguePresenter {
   init = () => {
     this.#filmsModel = new FilmsModel();
     this.#filmsData = [...this.#filmsModel.films];
+    this.#commentsModel = new CommentsModel(this.#filmsData);
+    this.#commentsData = [...this.#commentsModel.comments];
     this.#filmsFilters = generateFilter(this.#filmsData);
 
     this.#profileMenuContainer = document.querySelector('.header');
@@ -54,9 +59,9 @@ export default class FilmsCataloguePresenter {
     this.#filmsList = new FilmsListView();
     this.#filmListEmpty = new FilmsListEmptyView();
     this.#showMoreButton = new ShowMoreButtonPresenter();
-    this.#filmsModel = new FilmsModel();
-    this.#filmsData = [...this.#filmsModel.films];
-    this.#filmsDataSource = [...this.#filmsModel.films];
+    // this.#filmsModel = new FilmsModel();
+    // this.#filmsData = [...this.#filmsModel.films];
+    // this.#filmsDataSource = [...this.#filmsModel.films];
 
     render(this.#profileMenu, this.#profileMenuContainer);
     render(this.#navigationMenu, this.#filmsContainer);
@@ -67,9 +72,21 @@ export default class FilmsCataloguePresenter {
     this.#renderFilmCards();
   };
 
+  #getFilmCommentsData (filmData) {
+    const commentsId = filmData.comments;
+    const filmCommetnsData = [];
+    commentsId.forEach((id) => {
+      const commentIndex = this.#commentsData.map((el) => el.id).indexOf(id);
+      filmCommetnsData.push(this.#commentsData[commentIndex]);
+    });
+    return filmCommetnsData;
+
+  }
+
   #renderFilmCard = (filmData) => {
+    const filmCommentsData = this.#getFilmCommentsData(filmData);
     const filmCardComponent = new FilmCardPresenter(this.#filmsList.container, this.#updateUserDetails);
-    filmCardComponent.init(filmData);
+    filmCardComponent.init(filmData, filmCommentsData);
     this.#renderedFilms.set(filmData.id, filmCardComponent);
   };
 
@@ -141,8 +158,9 @@ export default class FilmsCataloguePresenter {
   };
 
   #updateUserDetails = (filmId, dataToUpdate) => {
+    const filmIndex = this.#filmsData.map((el) => el.id).indexOf(filmId);
     for (const key in dataToUpdate) {
-      this.#filmsData[filmId][key] = dataToUpdate[key];
+      this.#filmsData[filmIndex][key] = dataToUpdate[key];
     }
   };
 

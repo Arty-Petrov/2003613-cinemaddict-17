@@ -1,9 +1,6 @@
 import dayjs from 'dayjs';
-import {
-  getRandomArrayItem,
-  getRandomArrayPart,
-  getRandomPositiveInteger,
-} from '../utils/util';
+import { nanoid } from 'nanoid';
+import { getRandomArrayItem, getRandomArrayPart, getRandomPositiveInteger, } from '../utils/util';
 
 const Title = [
   'The Dance of Life',
@@ -40,9 +37,9 @@ const Descriptions = [
 ];
 const AgeRatings = ['18+', '16+', '6+', '0+'];
 
-export const generateFilm = (filmId) => ({
-  id: filmId,
-  comments: ['$Comment.id$', '$Comment.id$'],
+export const generateFilm = () => ({
+  id: nanoid(10),
+  comments: Array.from({length: getRandomPositiveInteger(1,5)}, () => nanoid(10)),
   filmInfo: {
     title: getRandomArrayItem(Title),
     alternativeTitle: '',

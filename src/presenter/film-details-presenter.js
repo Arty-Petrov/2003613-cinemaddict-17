@@ -1,5 +1,3 @@
-import CommentsModel from '../model/comments-model';
-
 import FilmDetailsView from '../view/film-details-view';
 import FilmDetailsCommentView from '../view/film-details-comment-view';
 import FilmDetailsNewCommentView from '../view/film-details-new-comment-view';
@@ -30,10 +28,9 @@ export default class FilmDetailsPresenter {
     return FilmDetailsPresenter.#instance;
   }
 
-  init = (filmData, callback) => {
+  init = (filmData, filmCommentsData, callback) => {
     this.#filmData = filmData;
-    this.#filmCommentsData = this.#getFilmCommentsData(this.#filmData);
-
+    this.#filmCommentsData = filmCommentsData;
     this.#existFilmDetailsPopup = this.#filmDetailsPopup;
 
     const [
@@ -109,19 +106,15 @@ export default class FilmDetailsPresenter {
     this.destroy();
   };
 
-  #getFilmCommentsData = (filmData) => {
-    const filmId = filmData.id;
-    const commentsData = new CommentsModel();
-    return [...commentsData.comments[filmId]];
+  #renderComments = (filmCommentsData) => {
+    filmCommentsData.forEach((filmComment) => {
+      console.log(`#renderComment ${filmComment}`);
+      this.#renderComment(filmComment)});
   };
 
-  #renderComments = (commentsData) => {
-    commentsData.forEach((commentData) => this.#renderComment(commentData));
-  };
-
-  #renderComment = (commentData) => {
+  #renderComment = (filmComment) => {
     render(
-      new FilmDetailsCommentView(commentData),
+      new FilmDetailsCommentView(filmComment),
       this.#filmDetailsPopup.commentsContainer
     );
   };

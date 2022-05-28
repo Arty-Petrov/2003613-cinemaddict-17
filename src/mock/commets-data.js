@@ -1,4 +1,5 @@
-import { getRandomArrayItem, getRandomPositiveInteger } from '../utils/util';
+import { nanoid } from 'nanoid';
+import { getRandomArrayItem, } from '../utils/util';
 
 const AuthorsList = ['Ilya O\'Reilly', 'Tim Macoveev', 'John Doe',];
 const CommentsList = [
@@ -11,12 +12,12 @@ const CommentsList = [
 ];
 const CommentEmotion = ['smile', 'sleeping', 'puke', 'angry'];
 
-export const generateComment = (filmId) => Array.from({length: getRandomPositiveInteger(1, 5)}, () =>
-  ({
-    id: filmId,
+export const generateComment = (id) => (
+  {
+    id: id,
     author: getRandomArrayItem(AuthorsList),
     comment: getRandomArrayItem(CommentsList),
     date: '2019-04-12T16:12:32.554Z',
     emotion: getRandomArrayItem(CommentEmotion),
-  })
+  }
 );
