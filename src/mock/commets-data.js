@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { getRandomArrayItem, } from '../utils/util';
 
 const AuthorsList = ['Ilya O\'Reilly', 'Tim Macoveev', 'John Doe',];
