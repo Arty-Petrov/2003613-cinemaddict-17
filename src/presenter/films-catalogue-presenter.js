@@ -43,6 +43,7 @@ export default class FilmsCataloguePresenter {
   init = () => {
     this.#filmsModel = new FilmsModel();
     this.#filmsData = [...this.#filmsModel.films];
+    this.#filmsDataSource = this.#filmsData.slice();
     this.#commentsModel = new CommentsModel(this.#filmsData);
     this.#commentsData = [...this.#commentsModel.comments];
     this.#filmsFilters = generateFilter(this.#filmsData);
@@ -59,9 +60,6 @@ export default class FilmsCataloguePresenter {
     this.#filmsList = new FilmsListView();
     this.#filmListEmpty = new FilmsListEmptyView();
     this.#showMoreButton = new ShowMoreButtonPresenter();
-    // this.#filmsModel = new FilmsModel();
-    // this.#filmsData = [...this.#filmsModel.films];
-    // this.#filmsDataSource = [...this.#filmsModel.films];
 
     render(this.#profileMenu, this.#profileMenuContainer);
     render(this.#navigationMenu, this.#filmsContainer);
