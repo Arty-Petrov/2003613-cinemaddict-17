@@ -5,6 +5,7 @@ import { render, replace, remove } from '../framework/render';
 export default class FilmCardPresenter {
   #filmId = null;
   #filmData = null;
+  #filmCommentsData = null;
   #updateUserDetails = null;
 
   #filmCardContainer = null;
@@ -18,8 +19,9 @@ export default class FilmCardPresenter {
     this.#updateUserDetails = callback;
   }
 
-  init =  (filmData) => {
+  init =  (filmData, filmCommentsData) => {
     this.#filmData = filmData;
+    this.#filmCommentsData = filmCommentsData;
     this.#filmCardComponent = new FilmCardView(this.#filmData);
     this.#filmCardComponent.setShowFilmDetailsHandler(this.#handleShowFilmDetail);
     this.#filmCardComponent.setAddToWatchListHandler(this.#handleAddToWatchList);
@@ -46,7 +48,7 @@ export default class FilmCardPresenter {
     ];
 
     this.#filmDetailsPopupComponent = new FilmDetailsPresenter();
-    this.#filmDetailsPopupComponent.init(this.#filmData, buttonHandlers);
+    this.#filmDetailsPopupComponent.init(this.#filmData, this.#filmCommentsData, buttonHandlers);
     this.#filmDetailsPopupComponent = null;
   };
 

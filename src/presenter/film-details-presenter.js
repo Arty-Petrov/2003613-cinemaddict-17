@@ -1,5 +1,3 @@
-import CommentsModel from '../model/comments-model';
-
 import FilmDetailsView from '../view/film-details-view';
 import FilmDetailsCommentView from '../view/film-details-comment-view';
 import FilmDetailsNewCommentView from '../view/film-details-new-comment-view';
@@ -30,10 +28,9 @@ export default class FilmDetailsPresenter {
     return FilmDetailsPresenter.#instance;
   }
 
-  init = (filmData, callback) => {
+  init = (filmData, filmCommentsData, callback) => {
     this.#filmData = filmData;
-    this.#filmCommentsData = this.#getFilmCommentsData(this.#filmData);
-
+    this.#filmCommentsData = filmCommentsData;
     this.#existFilmDetailsPopup = this.#filmDetailsPopup;
 
     const [
@@ -63,16 +60,17 @@ export default class FilmDetailsPresenter {
       render(this.#filmDetailsPopup, this.#filmDetailsContainer);
 
       this.#renderComments(this.#filmCommentsData);
+      this.#renderNewCommentForm();
 
-      render(
-        this.#filmDetailsNewComment,
-        this.#filmDetailsPopup.newCommentContainer
-      );
       this.#existFilmDetailsPopup = this.#filmDetailsPopup;
 
     } else if (this.#filmDetailsContainer.contains(this.#existFilmDetailsPopup.element)) {
       replace(this.#filmDetailsPopup, this.#existFilmDetailsPopup);
       this.#renderComments(this.#filmCommentsData);
+      render(
+        this.#filmDetailsNewComment,
+        this.#filmDetailsPopup.newCommentContainer
+      );
     }
   };
 
@@ -94,6 +92,37 @@ export default class FilmDetailsPresenter {
     this.#handleCardMarkAsFavorite();
   };
 
+  #handleClosePopup = () => {
+    this.#toggleBlockScroll();
+    document.removeEventListener('keydown', this.#handleEscKeydown);
+    // document.removeEventListener('keydown', this.#handleCtrCmdEnterKeydown);
+    this.destroy();
+  };
+
+  #handleEnterNewComment = () => {
+    const dataToUpdate = {};
+    dataToUpdate['id'] = this.#filmData.id;
+    dataToUpdate['emotion'] = '';
+    dataToUpdate['comment'] = '';
+  };
+
+  #handleEscKeydown = (evt) => {
+    if (evt.key === 'Esc' || evt.code === 'Escape') {
+      this.destroy();
+    }
+  };
+
+  #handleCtrCmdEnterKeydown = (evt, newCommentInput) => {
+    const {emotion, comment} = newCommentInput;
+    const newCommentData = {
+      author: 'new author',
+      comment: comment,
+      date: new Date(),
+      emotion: emotion,
+    };
+    this.#renderComment(newCommentData);
+  };
+
   #toggleBlockScroll = () => {
     const siteMainElement = document.body;
     if (!siteMainElement.classList.contains(BLOCK_SCROLL_CLASS)) {
@@ -103,33 +132,21 @@ export default class FilmDetailsPresenter {
     }
   };
 
-  #handleClosePopup = () => {
-    this.#toggleBlockScroll();
-    document.removeEventListener('keydown', this.#handleEscKeydown);
-    this.destroy();
+  #renderNewCommentForm = () => {
+    render(this.#filmDetailsNewComment, this.#filmDetailsPopup.newCommentContainer);
+    this.#filmDetailsNewComment.setNewCommentEnter(this.#handleCtrCmdEnterKeydown);
   };
 
-  #getFilmCommentsData = (filmData) => {
-    const filmId = filmData.id;
-    const commentsData = new CommentsModel();
-    return [...commentsData.comments[filmId]];
+  #renderComments = (filmCommentsData) => {
+    filmCommentsData.forEach((filmComment) => {
+      this.#renderComment(filmComment);});
   };
 
-  #renderComments = (commentsData) => {
-    commentsData.forEach((commentData) => this.#renderComment(commentData));
-  };
-
-  #renderComment = (commentData) => {
+  #renderComment = (filmComment) => {
     render(
-      new FilmDetailsCommentView(commentData),
+      new FilmDetailsCommentView(filmComment),
       this.#filmDetailsPopup.commentsContainer
     );
-  };
-
-  #handleEscKeydown = (evt) => {
-    if (evt.key === 'Esc' || evt.code === 'Escape') {
-      this.destroy();
-    }
   };
 
   destroy = () => {
