@@ -28,9 +28,9 @@ export default class FilmDetailsPresenter {
     return FilmDetailsPresenter.#instance;
   }
 
-  init = (filmData, filmCommentsData, callback) => {
+  init = (filmData, callback) => {
     this.#filmData = filmData;
-    this.#filmCommentsData = filmCommentsData;
+    //this.#filmCommentsData = filmCommentsData;
     this.#existFilmDetailsPopup = this.#filmDetailsPopup;
 
     const [

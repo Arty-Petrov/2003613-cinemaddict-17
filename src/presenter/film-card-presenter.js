@@ -1,43 +1,39 @@
 import FilmCardView from '../view/film-card-view';
 import FilmDetailsPresenter from './film-details-presenter';
 import { render, replace, remove } from '../framework/render';
+import { UpdateType, UserAction } from '../enum';
 
 export default class FilmCardPresenter {
-  #filmId = null;
   #filmData = null;
-  #filmCommentsData = null;
-  #updateUserDetails = null;
+  #handleViewActions = null;
 
   #filmCardContainer = null;
   #filmCardComponent = null;
-  #existFilmCardComponent = null;
 
   #filmDetailsPopupComponent = null;
 
   constructor(filmCardContainer, callback) {
     this.#filmCardContainer = filmCardContainer;
-    this.#updateUserDetails = callback;
+    this.#handleViewActions = callback;
   }
 
-  init =  (filmData, filmCommentsData) => {
+  init =  (filmData) => {
     this.#filmData = filmData;
-    this.#filmCommentsData = filmCommentsData;
+    const prevfilmCardComponent = this.#filmCardComponent;
+
     this.#filmCardComponent = new FilmCardView(this.#filmData);
     this.#filmCardComponent.setShowFilmDetailsHandler(this.#handleShowFilmDetail);
     this.#filmCardComponent.setAddToWatchListHandler(this.#handleAddToWatchList);
     this.#filmCardComponent.setMarkAsWhatchedHandler(this.#handleMarkAsWhatched);
     this.#filmCardComponent.setMarkAsFavoriteHandler(this.#handleMarkAsFavorite);
 
-    if (this.#existFilmCardComponent === null){
+    if (prevfilmCardComponent === null){
       render (this.#filmCardComponent, this.#filmCardContainer);
       return;
     }
 
-    if (this.filmCardContainer.contains(this.#existFilmCardComponent.element)){
-      replace(this.#filmCardComponent,this.#existFilmCardComponent);
-    }
-
-    remove(this.#existFilmCardComponent);
+    replace(this.#filmCardComponent,prevfilmCardComponent);
+    remove(prevfilmCardComponent);
   };
 
   #handleShowFilmDetail = () => {
@@ -48,7 +44,7 @@ export default class FilmCardPresenter {
     ];
 
     this.#filmDetailsPopupComponent = new FilmDetailsPresenter();
-    this.#filmDetailsPopupComponent.init(this.#filmData, this.#filmCommentsData, buttonHandlers);
+    this.#filmDetailsPopupComponent.init(this.#filmData, buttonHandlers);
     this.#filmDetailsPopupComponent = null;
   };
 
@@ -56,25 +52,16 @@ export default class FilmCardPresenter {
     const inWatchlist = !this.#filmData.userDetails.watchlist;
     this.#filmData.userDetails.watchlist = inWatchlist;
 
-    const dataToUpdate = {};
-    dataToUpdate['id'] = this.#filmData.id;
-    dataToUpdate['watchlist'] = inWatchlist;
-
-    this.#updateUserDetails(this.#filmData.id, dataToUpdate);
+    this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR,this.#filmData);
     this.#filmCardComponent.setAddToWatchList(inWatchlist);
   };
 
   #handleMarkAsWhatched = () => {
     const alreadyWatched = !this.#filmData.userDetails.alreadyWatched;
     this.#filmData.userDetails.alreadyWatched = alreadyWatched;
-    const now = new Date();
+    this.#filmData.userDetails.watchingDate = (alreadyWatched) ? new Date() : null;
 
-    const dataToUpdate = {};
-    dataToUpdate['id'] = this.#filmData.id;
-    dataToUpdate['alreadyWatched'] = alreadyWatched;
-    dataToUpdate['watchingDate'] = alreadyWatched ? now : null;
-
-    this.#updateUserDetails(this.#filmData.id, dataToUpdate);
+    this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR,this.#filmData);
     this.#filmCardComponent.setMarkAsWhatched(alreadyWatched);
   };
 
@@ -82,11 +69,7 @@ export default class FilmCardPresenter {
     const isFavorite = !this.#filmData.userDetails.favorite;
     this.#filmData.userDetails.favorite = isFavorite;
 
-    const dataToUpdate = {};
-    dataToUpdate['id'] = this.#filmData.id;
-    dataToUpdate['favorite'] = isFavorite;
-
-    this.#updateUserDetails(this.#filmData.id, dataToUpdate);
+    this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR,this.#filmData);
     this.#filmCardComponent.setMarkAsFavorite(isFavorite);
   };
 
