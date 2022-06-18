@@ -1,5 +1,5 @@
 import FilmCardView from '../view/film-card-view';
-import FilmDetailsPresenter from './film-details-presenter';
+import FilmPopupPresenter from './film-popup-presenter';
 import { render, replace, remove } from '../framework/render';
 import { UpdateType, UserAction } from '../enum';
 
@@ -7,33 +7,33 @@ export default class FilmCardPresenter {
   #filmData = null;
   #handleViewActions = null;
 
+  #filmCard = null;
   #filmCardContainer = null;
-  #filmCardComponent = null;
 
-  #filmDetailsPopupComponent = null;
+  #filmPopup = null;
 
   constructor(filmCardContainer, callback) {
     this.#filmCardContainer = filmCardContainer;
     this.#handleViewActions = callback;
   }
 
-  init =  (filmData) => {
+  init = (filmData) => {
     this.#filmData = filmData;
-    const prevfilmCardComponent = this.#filmCardComponent;
+    const prevFilmCardComponent = this.#filmCard;
 
-    this.#filmCardComponent = new FilmCardView(this.#filmData);
-    this.#filmCardComponent.setShowFilmDetailsHandler(this.#handleShowFilmDetail);
-    this.#filmCardComponent.setAddToWatchListHandler(this.#handleAddToWatchList);
-    this.#filmCardComponent.setMarkAsWhatchedHandler(this.#handleMarkAsWhatched);
-    this.#filmCardComponent.setMarkAsFavoriteHandler(this.#handleMarkAsFavorite);
+    this.#filmCard = new FilmCardView(this.#filmData);
+    this.#filmCard.setShowFilmDetailsHandler(this.#handleShowFilmDetail);
+    this.#filmCard.setAddToWatchListHandler(this.#handleAddToWatchList);
+    this.#filmCard.setMarkAsWhatchedHandler(this.#handleMarkAsWhatched);
+    this.#filmCard.setMarkAsFavoriteHandler(this.#handleMarkAsFavorite);
 
-    if (prevfilmCardComponent === null){
-      render (this.#filmCardComponent, this.#filmCardContainer);
+    if (prevFilmCardComponent === null){
+      render (this.#filmCard, this.#filmCardContainer);
       return;
     }
 
-    replace(this.#filmCardComponent,prevfilmCardComponent);
-    remove(prevfilmCardComponent);
+    replace(this.#filmCard, prevFilmCardComponent);
+    remove(prevFilmCardComponent);
   };
 
   #handleShowFilmDetail = () => {
@@ -43,17 +43,14 @@ export default class FilmCardPresenter {
       this.#handleMarkAsFavorite,
     ];
 
-    this.#filmDetailsPopupComponent = new FilmDetailsPresenter();
-    this.#filmDetailsPopupComponent.init(this.#filmData, buttonHandlers);
-    this.#filmDetailsPopupComponent = null;
+    this.#filmPopup = new FilmPopupPresenter();
+    this.#filmPopup.init(this.#filmData, buttonHandlers);
   };
 
   #handleAddToWatchList = () => {
     const inWatchlist = !this.#filmData.userDetails.watchlist;
     this.#filmData.userDetails.watchlist = inWatchlist;
-
-    this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR,this.#filmData);
-    this.#filmCardComponent.setAddToWatchList(inWatchlist);
+    this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#filmData);
   };
 
   #handleMarkAsWhatched = () => {
@@ -62,7 +59,6 @@ export default class FilmCardPresenter {
     this.#filmData.userDetails.watchingDate = (alreadyWatched) ? new Date() : null;
 
     this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR,this.#filmData);
-    this.#filmCardComponent.setMarkAsWhatched(alreadyWatched);
   };
 
   #handleMarkAsFavorite = () => {
@@ -70,10 +66,10 @@ export default class FilmCardPresenter {
     this.#filmData.userDetails.favorite = isFavorite;
 
     this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR,this.#filmData);
-    this.#filmCardComponent.setMarkAsFavorite(isFavorite);
   };
 
   destroy = () => {
-    remove(this.#filmCardComponent);
+    remove(this.#filmCard);
+    this.#filmCard = null;
   };
 }

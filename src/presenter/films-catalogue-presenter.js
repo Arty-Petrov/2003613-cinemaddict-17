@@ -117,6 +117,7 @@ export default class FilmsCataloguePresenter {
     this.#renderedFilms.forEach((presenter) => presenter.destroy());
     this.#renderedFilms.clear();
     this.#showMoreButton.destroy();
+
     if (this.#existfilmListEmpty) {
       this.#existfilmListEmpty = !this.#existfilmListEmpty;
       remove(this.#filmListEmpty);

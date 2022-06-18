@@ -3,11 +3,11 @@ import FilterModel from './model/filter-model';
 
 import FilmsCataloguePresenter from './presenter/films-catalogue-presenter';
 import FiltersPresenter from './presenter/filters-presenter';
-
+import CommentsModel from './model/comments-model';
 
 const filmsModel = new FilmsModel();
 const filterModel = new FilterModel();
-
+new CommentsModel(filmsModel.films);
 
 const mainContainer = document.querySelector('main');
 const profileMenuContainer = document.querySelector('.header');

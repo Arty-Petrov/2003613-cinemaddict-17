@@ -1,13 +1,18 @@
 import Observable from '../framework/observable';
 import { DATA_LENGTH } from '../enum';
 import { generateFilm } from '../mock/film-data';
-
 export default class FilmsModel extends Observable{
+  static #instance = null;
   #films = null;
 
   constructor() {
-    super();
-    this.#films = Array.from({length: DATA_LENGTH}, () => generateFilm());
+    if (!FilmsModel.#instance) {
+      super();
+      this.#films = Array.from({length: DATA_LENGTH}, () => generateFilm());
+      FilmsModel.#instance = this;
+      return;
+    }
+    return FilmsModel.#instance;
   }
 
   get films () {

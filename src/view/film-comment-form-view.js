@@ -1,6 +1,7 @@
+import { UserAction, UpdateType } from '../enum';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 
-const createFilmDetailsNewCommentTemplate = () => (
+const createFilmCommentFormTemplate = () => (
   `<div class="film-details__new-comment">
     <div class="film-details__add-emoji-label"></div>
 
@@ -32,7 +33,7 @@ const createFilmDetailsNewCommentTemplate = () => (
   </div>`
 );
 
-export default class FilmDetailsNewCommentView extends AbstractStatefulView {
+export default class FilmCommentFormView extends AbstractStatefulView {
   _state = null;
   #emotionSelector = null;
   #commentEmotionLable = null;
@@ -45,13 +46,10 @@ export default class FilmDetailsNewCommentView extends AbstractStatefulView {
   }
 
   get template() {
-    return createFilmDetailsNewCommentTemplate();
+    return createFilmCommentFormTemplate();
   }
 
-  static initState = () =>  ({
-    emotion: '',
-    comment: '',
-  });
+  static initState = () => ({});
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
@@ -69,11 +67,16 @@ export default class FilmDetailsNewCommentView extends AbstractStatefulView {
 
   #newCommentEntertHandler = (evt) => {
     if ((evt.ctrlKey || evt.metaKey) && (evt.code === 'Enter' || evt.key === 'Enter')){
+      let commentData = FilmCommentFormView.convertStateToData(this._state);
+      if (commentData.emotion === undefined) {
+        return;
+      }
       evt.preventDefault();
-      const commentData = FilmDetailsNewCommentView.convertStateToData(this._state);
-      this._callback.newCommentEnterKeydown(evt, commentData);
-      this.updateElement(FilmDetailsNewCommentView.initState);
+      this.updateElement(FilmCommentFormView.initState);
+      this._callback.newCommentEnterKeydown(UserAction.ADD_COMMENT, UpdateType.PATCH, commentData);
       this.element.scrollIntoView(top);
+      commentData = {};
+      this._state = {};
     }
   };
 

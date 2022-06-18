@@ -56,7 +56,6 @@ export default class FilmCardView extends AbstractView {
   #addToWatchListButton = null;
   #markAsWhatchedButton = null;
   #markAsFavoriteButton = null;
-  #controlActivityClass = null;
 
   constructor(filmData) {
     super();
@@ -65,31 +64,10 @@ export default class FilmCardView extends AbstractView {
     this.#addToWatchListButton = this.element.querySelector('.film-card__controls-item--add-to-watchlist');
     this.#markAsWhatchedButton = this.element.querySelector('.film-card__controls-item--mark-as-watched');
     this.#markAsFavoriteButton = this.element.querySelector('.film-card__controls-item--favorite');
-    this.#controlActivityClass = 'film-card__controls-item--active';
   }
 
   get template() {
     return createFilmCardTemplate(this.#filmData);
-  }
-
-  #updateButtonStatus (element, status) {
-    if (status) {
-      element.classList.add(this.#controlActivityClass);
-    } else {
-      element.classList.remove(this.#controlActivityClass);
-    }
-  }
-
-  setAddToWatchList(buttonStatus) {
-    this.#updateButtonStatus(this.#addToWatchListButton, buttonStatus);
-  }
-
-  setMarkAsWhatched(buttonStatus) {
-    this.#updateButtonStatus(this.#markAsWhatchedButton, buttonStatus);
-  }
-
-  setMarkAsFavorite(buttonStatus) {
-    this.#updateButtonStatus(this.#markAsFavoriteButton, buttonStatus);
   }
 
   setShowFilmDetailsHandler(callback) {

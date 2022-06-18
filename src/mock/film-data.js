@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
+import FilmsModel from '../model/films-model';
 import { getRandomArrayItem, getRandomArrayPart, getRandomPositiveInteger, } from '../utils/util';
+import { UpdateType } from '../enum';
 
 const Title = [
   'The Dance of Life',
@@ -39,7 +41,7 @@ const AgeRatings = ['18+', '16+', '6+', '0+'];
 
 export const generateFilm = () => ({
   id: nanoid(10),
-  comments: Array.from({length: getRandomPositiveInteger(1,5)}, () => nanoid(10)),
+  comments:[],
   filmInfo: {
     title: getRandomArrayItem(Title),
     alternativeTitle: '',
@@ -66,3 +68,30 @@ export const generateFilm = () => ({
     favorite: getRandomPositiveInteger(0, 1),
   },
 });
+
+export const putCommentsIdToFilm = (film, commentsSet) => {
+  const filmsModel = new FilmsModel();
+  const filmToUpdate = film;
+  const filmCommentsSet = commentsSet;
+  if (filmCommentsSet.constructor.name === 'Array'){
+    filmCommentsSet.forEach((comment) => filmToUpdate.comments.push(comment.id));
+  } else {
+    filmToUpdate.comments.push(filmCommentsSet.id);
+  }
+  filmsModel.updateFilm(UpdateType.PATCH, filmToUpdate);
+};
+
+export const removeCommentIdFromFilm = (film, data) => {
+  const filmsModel = new FilmsModel();
+  const filmToUpdate = film;
+  const commentToRemove = data;
+  const commentsData = [...filmToUpdate.comments];
+  const indexToRemove = commentsData.indexOf(commentToRemove.id);
+  const newCommentsData = [
+    ...commentsData.slice(0, indexToRemove),
+    ...commentsData.slice(indexToRemove + 1),
+  ];
+  filmToUpdate.comments = null;
+  filmToUpdate.comments = newCommentsData;
+  filmsModel.updateFilm(UpdateType.PATCH, filmToUpdate);
+};
