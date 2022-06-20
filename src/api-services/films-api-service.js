@@ -25,7 +25,7 @@ export default class FilmsApiService extends ApiService {
   };
 
   #adaptToServer = (film) => {
-    const adaptedFilm = {...film,
+    const adaptedFilm = {
       'id': film.id,
       'comments': film.comments,
       'film_info': {
@@ -52,27 +52,6 @@ export default class FilmsApiService extends ApiService {
         'favorite': !!film.userDetails.favorite
       }
     };
-
-    delete adaptedFilm.filmInfo.title;
-    delete adaptedFilm.filmInfo.alternativeTitle;
-    delete adaptedFilm.filmInfo.totalRating;
-    delete adaptedFilm.filmInfo.poster;
-    delete adaptedFilm.filmInfo.ageRating;
-    delete adaptedFilm.filmInfo.director;
-    delete adaptedFilm.filmInfo.writers;
-    delete adaptedFilm.filmInfo.actors;
-    delete adaptedFilm.filmInfo.release.date;
-    delete adaptedFilm.filmInfo.release.releaseCountry;
-    delete adaptedFilm.filmInfo.release;
-    delete adaptedFilm.filmInfo.runtime;
-    delete adaptedFilm.filmInfo.genre;
-    delete adaptedFilm.filmInfo.description;
-    delete adaptedFilm.filmInfo;
-    delete adaptedFilm.userDetails.watchlist;
-    delete adaptedFilm.userDetails.alreadyWatched;
-    delete adaptedFilm.userDetails.watchingDate;
-    delete adaptedFilm.userDetails.favorite;
-    delete adaptedFilm.userDetails;
 
     return adaptedFilm;
   };

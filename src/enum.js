@@ -66,6 +66,12 @@ export const UserAction = {
   UPDATE_FILM: 'UPDATE_FILM',
 };
 
+export const UserDetails = {
+  WATCHLIST: 'watchlist',
+  WATCHED: 'watched',
+  FAVORITE: 'favorite',
+};
+
 export const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',

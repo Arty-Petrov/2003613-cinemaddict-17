@@ -1,6 +1,8 @@
 import AbstractView from '../framework/view/abstract-view';
 import { convertMinutesToHM, cutStringLength, humanizeUTC } from '../utils/util';
 
+const CONTROL_ITEM_CLASS = 'film-card__controls-item';
+const CONTROL_ITEM_ACTIVE_CLASS = 'film-details__control-button--active';
 const DESCRIPTION_LENGTH_LIMIT = 140;
 
 const createFilmCardTemplate = (filmData) => {
@@ -42,9 +44,9 @@ const createFilmCardTemplate = (filmData) => {
         <span class="film-card__comments">${comments.length} ${(comments.length === 1) ? 'comment': 'comments'}</span>
       </a>
       <div class="film-card__controls">
-        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${getControlActivityClass(watchlist)}" type="button">Add to watchlist</button>
-        <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${getControlActivityClass(alreadyWatched)}" type="button">Mark as watched</button>
-        <button class="film-card__controls-item film-card__controls-item--favorite ${getControlActivityClass(favorite)}" type="button">Mark as favorite</button>
+        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${getControlActivityClass(watchlist)}" type="button" id="watchlist">Add to watchlist</button>
+        <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${getControlActivityClass(alreadyWatched)}" type="button" id="watched">Mark as watched</button>
+        <button class="film-card__controls-item film-card__controls-item--favorite ${getControlActivityClass(favorite)}" type="button" id="favorite">Mark as favorite</button>
       </div>
     </article>`
   );
@@ -53,17 +55,13 @@ const createFilmCardTemplate = (filmData) => {
 export default class FilmCardView extends AbstractView {
   #filmData = null;
   #showFilmDetailsClickArea = null;
-  #addToWatchListButton = null;
-  #markAsWhatchedButton = null;
-  #markAsFavoriteButton = null;
+  #userDetailsControls = null;
 
   constructor(filmData) {
     super();
     this.#filmData = filmData;
     this.#showFilmDetailsClickArea = this.element.querySelector('.film-card__link');
-    this.#addToWatchListButton = this.element.querySelector('.film-card__controls-item--add-to-watchlist');
-    this.#markAsWhatchedButton = this.element.querySelector('.film-card__controls-item--mark-as-watched');
-    this.#markAsFavoriteButton = this.element.querySelector('.film-card__controls-item--favorite');
+    this.#userDetailsControls = this.element.querySelector('.film-card__controls');
   }
 
   get template() {
@@ -75,38 +73,24 @@ export default class FilmCardView extends AbstractView {
     this.#showFilmDetailsClickArea.addEventListener('click', this.#showFilmDetailsClickHandler);
   }
 
-  setAddToWatchListHandler(callback) {
-    this._callback.addToWatchListClick = callback;
-    this.#addToWatchListButton.addEventListener('click', this.#addToWatchListHandler);
-  }
-
-  setMarkAsWhatchedHandler(callback) {
-    this._callback.markAsWhatchedClick = callback;
-    this.#markAsWhatchedButton.addEventListener('click', this.#markAsWhatchedHandler);
-  }
-
-  setMarkAsFavoriteHandler(callback) {
-    this._callback.markAsFavoriteClick = callback;
-    this.#markAsFavoriteButton.addEventListener('click', this.#markAsFavoriteHandler);
-  }
-
   #showFilmDetailsClickHandler = (evt) => {
     evt.preventDefault();
     this._callback.showFilmDetailsClick();
   };
 
-  #addToWatchListHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.addToWatchListClick();
-  };
+  setUserDetailsControlsHandler(callback) {
+    this._callback.userDetailsControlsClick = callback;
+    this.#userDetailsControls.addEventListener('click', this.#userDetailsControlsHandler);
+  }
 
-  #markAsWhatchedHandler = (evt) => {
+  #userDetailsControlsHandler = (evt) => {
+    if (!evt.target.classList.contains(CONTROL_ITEM_CLASS)){
+      return;
+    }
     evt.preventDefault();
-    this._callback.markAsWhatchedClick();
-  };
-
-  #markAsFavoriteHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.markAsFavoriteClick();
+    const userDetailId = evt.target.id;
+    this._callback.userDetailsControlsClick(userDetailId);
+    const buttonElement = this.element.querySelector(`#${userDetailId}`);
+    buttonElement.classList.toggle(CONTROL_ITEM_ACTIVE_CLASS);
   };
 }

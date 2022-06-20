@@ -138,14 +138,11 @@ export default class FilmsCataloguePresenter {
         this.#renderedFilms.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
-        console.log('UpdateType.MINOR');
-        
         this.#filmsData = this.films;
         this.#cleanUpFilmsList();
         this.#renderFilmCatalogue();
         break;
       case UpdateType.MAJOR:
-        console.log('UpdateType.MAJOR');
         this.#currentSortType = SortType.DEFAULT;
         this.#filmsData = this.films;
         this.#cleanUpFilmsList(UpdateType.MAJOR);

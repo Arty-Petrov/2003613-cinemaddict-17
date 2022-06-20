@@ -1,6 +1,9 @@
 import AbstractView from '../framework/view/abstract-view';
 import { convertMinutesToHM, humanizeUTC } from '../utils/util';
 
+const CONTROL_ITEM_CLASS = 'film-details__control-button';
+const CONTROL_ITEM_ACTIVE_CLASS = 'film-details__control-button--active';
+
 const createFilmDetailsTemplate = (filmData) => {
   const {
     filmInfo : {
@@ -98,73 +101,36 @@ const createFilmDetailsTemplate = (filmData) => {
         <button type="button" class="film-details__control-button ${getControlActivityClass(watchlist)} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
         <button type="button" class="film-details__control-button ${getControlActivityClass(alreadyWatched)} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
         <button type="button" class="film-details__control-button ${getControlActivityClass(favorite)} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
-      </section>
-    `);
+      </section>`);
 };
 
 export default class FilmDetailsView extends AbstractView {
   #filmData = null;
-  #addToWatchListButton = null;
-  #markAsWhatchedButton = null;
-  #markAsFavoriteButton = null;
-  #controlActivityClass = null;
+  #userDetailsControls = null;
 
   constructor(filmData) {
     super();
     this.#filmData = filmData;
-    this.#addToWatchListButton = this.element.querySelector('.film-details__control-button--watchlist');
-    this.#markAsWhatchedButton = this.element.querySelector('.film-details__control-button--watched');
-    this.#markAsFavoriteButton = this.element.querySelector('.film-details__control-button--favorite');
-    this.#controlActivityClass = 'film-details__control-button--active';
+    this.#userDetailsControls = this.element.querySelector('.film-details__controls');
   }
 
   get template() {
     return createFilmDetailsTemplate(this.#filmData);
   }
 
-  get commentsContainer() {
-    return this.element.querySelector('.film-details__comments-list');
+  setUserDetailsControlsHandler(callback) {
+    this._callback.userDetailsControlsClick = callback;
+    this.#userDetailsControls.addEventListener('click', this.#userDetailsControlsHandler);
   }
 
-  get newCommentContainer() {
-    return this.element.querySelector('.film-details__comments-wrap');
-  }
-
-  #updateButtonStatus = (element, status) => {
-    if (status) {
-      element.classList.add(this.#controlActivityClass);
-    } else {
-      element.classList.remove(this.#controlActivityClass);
+  #userDetailsControlsHandler = (evt) => {
+    if (!evt.target.classList.contains(CONTROL_ITEM_CLASS)){
+      return;
     }
-  };
-
-  setAddToWatchListHandler(callback) {
-    this._callback.addToWatchListClick = callback;
-    this.#addToWatchListButton.addEventListener('click', this.#addToWatchListHandler);
-  }
-
-  setMarkAsWhatchedHandler(callback) {
-    this._callback.markAsWhatchedClick = callback;
-    this.#markAsWhatchedButton.addEventListener('click', this.#markAsWhatchedHandler);
-  }
-
-  setMarkAsFavoriteHandler(callback) {
-    this._callback.markAsFavoriteClick = callback;
-    this.#markAsFavoriteButton.addEventListener('click', this.#markAsFavoriteHandler);
-  }
-
-  #addToWatchListHandler = (evt) => {
     evt.preventDefault();
-    this._callback.addToWatchListClick();
-  };
-
-  #markAsWhatchedHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.markAsWhatchedClick();
-  };
-
-  #markAsFavoriteHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.markAsFavoriteClick();
+    const userDetailId = evt.target.id;
+    this._callback.userDetailsControlsClick(userDetailId);
+    const buttonElement = this.element.querySelector(`#${userDetailId}`);
+    buttonElement.classList.toggle(CONTROL_ITEM_ACTIVE_CLASS);
   };
 }

@@ -1,15 +1,19 @@
 
+import FilmsModel from '../model/films-model';
+
 import FilmDetailsPresenter from './film-details-presenter';
 import FilmCommentsPresenter from './film-comments-presenter';
 import FilmPopupView from '../view/film-popup-view';
 import { remove, render } from '../framework/render';
+import { UpdateType } from '../enum';
 
 const BLOCK_SCROLL_CLASS = 'hide-overflow';
 
 export default class FilmPopupPresenter {
   static #instance = null;
   #filmData = null;
-  #filmDetailsHanlers = null;
+  #filmsModel = null;
+  #filmDetailsHanler = null;
   #filmPopup = null;
   #existFilmPopup = null;
   #filmPopupContainer = null;
@@ -27,26 +31,25 @@ export default class FilmPopupPresenter {
 
   init = (filmData, callback) => {
     this.#filmData = filmData;
-    this.#filmDetailsHanlers = callback;
+    this.#filmsModel = new FilmsModel();
+    this.#filmDetailsHanler = callback;
     this.#existFilmPopup = this.#filmPopup;
     this.#renderPopup();
 
     this.#filmDetailsPresenter = new FilmDetailsPresenter(
       this.#filmPopup.filmDetailsContainer
     );
-    this.#filmDetailsPresenter.init(this.#filmData, this.#filmDetailsHanlers);
+    this.#filmDetailsPresenter.init(this.#filmData, this.#filmDetailsHanler);
 
     this.#filmCommentsPresenter = new FilmCommentsPresenter(
       this.#filmPopup.filmCommentsContainer
     );
-    this.#filmCommentsPresenter.init(this.#filmData);
+    this.#filmsModel.addObserver(this.#handleModelEvent);
   };
 
   destroy = () => {
     this.#filmDetailsPresenter.destroy();
-    this.#filmDetailsPresenter = null;
     this.#filmCommentsPresenter.destroy();
-    this.#filmCommentsPresenter = null;
 
     this.#filmPopupContainer.classList.toggle(BLOCK_SCROLL_CLASS);
     remove(this.#filmPopup);
@@ -72,6 +75,13 @@ export default class FilmPopupPresenter {
   #handleEscKeydown = (evt) => {
     if (evt.key === 'Esc' || evt.code === 'Escape') {
       this.#handleClosePopup();
+    }
+  };
+
+  #handleModelEvent = (updateType, data) => {
+    if (updateType === UpdateType.MINOR) {
+      this.#filmData = data;
+      this.#filmDetailsPresenter.init(this.#filmData, this.#filmDetailsHanler);
     }
   };
 }

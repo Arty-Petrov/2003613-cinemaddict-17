@@ -6,8 +6,13 @@ export default class FilmsModel extends Observable{
   #films = null;
 
   constructor(filmsApiService) {
-    super();
-    this.#filmsApiService = filmsApiService;
+    if (!FilmsModel.#instance) {
+      super();
+      this.#filmsApiService = filmsApiService;
+      FilmsModel.#instance = this;
+      return;
+    }
+    return FilmsModel.#instance;
   }
 
   init = async () => {
@@ -40,12 +45,12 @@ export default class FilmsModel extends Observable{
       ];
       this._notify(updateType, updatedFilm);
     } catch(err) {
-      throw new Error('Can\'t update task');
+      throw new Error('Can\'t update film');
     }
   };
 
   #adaptToClient = (film) => {
-    const adaptedFilm = {...film,
+    const adaptedFilm = {
       id: film['id'],
       comments: film['comments'],
       filmInfo: {
@@ -72,28 +77,6 @@ export default class FilmsModel extends Observable{
         favorite: film['user_details']['favorite']
       }
     };
-
-    delete adaptedFilm.film_info.title;
-    delete adaptedFilm.film_info.alternative_title;
-    delete adaptedFilm.film_info.total_rating;
-    delete adaptedFilm.film_info.poster;
-    delete adaptedFilm.film_info.age_rating;
-    delete adaptedFilm.film_info.director;
-    delete adaptedFilm.film_info.writers;
-    delete adaptedFilm.film_info.actors;
-    delete adaptedFilm.film_info.release.date;
-    delete adaptedFilm.film_info.release.release_country;
-    delete adaptedFilm.film_info.release;
-    delete adaptedFilm.film_info.runtime;
-    delete adaptedFilm.film_info.genre;
-    delete adaptedFilm.film_info.description;
-    delete adaptedFilm.film_info;
-
-    delete adaptedFilm.user_details.watchlist;
-    delete adaptedFilm.user_details.already_watched;
-    delete adaptedFilm.user_details.watching_date;
-    delete adaptedFilm.user_details.favorite;
-    delete adaptedFilm.user_details;
 
     return adaptedFilm;
   };
