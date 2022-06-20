@@ -17,9 +17,9 @@ export default class FiltersPresenter {
   #footerStatisticsContainer = null;
 
   constructor (mainContainer, profileContainer, footerContainer, filmsModel, filtersModel) {
-    this.#mainContainer = mainContainer;
     this.#filmsModel = filmsModel;
     this.#filterModel = filtersModel;
+    this.#mainContainer = mainContainer;
     this.#profileMenuContainer = profileContainer;
     this.#footerStatisticsContainer = footerContainer;
 
@@ -29,7 +29,6 @@ export default class FiltersPresenter {
 
   get filters() {
     const films = this.#filmsModel.films;
-
     return [
       {
         type: FilterType.ALL,
@@ -87,6 +86,9 @@ export default class FiltersPresenter {
       case UpdateType.MAJOR:
         this.init();
         break;
+      case UpdateType.INIT:
+        this.init();
+        break;
     }
   };
 
@@ -94,7 +96,6 @@ export default class FiltersPresenter {
     if (this.#filterModel.filter === filterType) {
       return;
     }
-
     this.#filterModel.setFilter(UpdateType.MAJOR, filterType);
   };
 }
