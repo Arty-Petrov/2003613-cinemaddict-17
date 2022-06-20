@@ -50,6 +50,7 @@ export default class FilmCardPresenter {
   #handleAddToWatchList = () => {
     const inWatchlist = !this.#filmData.userDetails.watchlist;
     this.#filmData.userDetails.watchlist = inWatchlist;
+    console.log(this.#filmData);
     this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#filmData);
   };
 
@@ -57,8 +58,7 @@ export default class FilmCardPresenter {
     const alreadyWatched = !this.#filmData.userDetails.alreadyWatched;
     this.#filmData.userDetails.alreadyWatched = alreadyWatched;
     this.#filmData.userDetails.watchingDate = (alreadyWatched) ? new Date() : null;
-
-    this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR,this.#filmData);
+    this.#handleViewActions(UserAction.UPDATE_FILM, UpdateType.MINOR, this.#filmData);
   };
 
   #handleMarkAsFavorite = () => {
