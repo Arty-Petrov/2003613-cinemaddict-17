@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import CommentsModel from '../model/comments-model';
 
 import FilmCommentView from '../view/film-comment-view';
@@ -6,9 +7,11 @@ import FilmCommentsView from '../view/film-comments-view';
 
 import { render, remove } from '../framework/render';
 import { UpdateType, UserAction } from '../enum';
+import FilmsModel from '../model/films-model';
 export default class FilmCommentsPresenter {
   static #instance = null;
   #film = null;
+  #filmsModel = null;
   #commentsModel = null;
   #renderedComments = new Map();
 
@@ -21,6 +24,7 @@ export default class FilmCommentsPresenter {
   constructor (container) {
     this.#commentsSectionContainer = container;
     if (!FilmCommentsPresenter.#instance) {
+      this.#filmsModel = new FilmsModel();
       this.#commentsModel = new CommentsModel();
       FilmCommentsPresenter.#instance = this;
       this.#commentsModel.addObserver(this.#handleModelEvent);
@@ -32,10 +36,6 @@ export default class FilmCommentsPresenter {
   init = (film) => {
     this.#film = film;
     this.#commentsModel.init(film);
-
-    if (this.#commentsSection) {
-      this.#clearCommentsSection();
-    }
 
     this.#commentsSection = new FilmCommentsView(this.#film);
     this.#commentsListContainer = this.#commentsSection.commentsListContainer;
@@ -82,9 +82,27 @@ export default class FilmCommentsPresenter {
     this.#commentForm.setNewCommentEnter(this.#handleViewAction);
   };
 
-  #handleModelEvent = (updateType, data) => {
+  #removeComment = (commentId) => {
+    remove(this.#renderedComments.get(commentId));
+    this.#renderedComments.delete(commentId);
+  };
+
+  updateFilmInfo = (data) => {
+    this.#film = data;
+    this.#commentsSection.setCommentsCount(this.#film.comments.length);
+  };
+
+  #handleModelEvent = async (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
+        if (typeof data === 'string') {
+          this.#removeComment(data);
+          this.#filmsModel.updateFilmById(UpdateType.PATCH, this.#film.id);
+          return;
+        }
+        this.#renderComment(data);
+        this.#commentForm.element.scrollIntoView(top);
+        this.#filmsModel.updateFilmById(UpdateType.PATCH, this.#film.id);
         break;
       case UpdateType.MINOR:
         break;
@@ -94,28 +112,15 @@ export default class FilmCommentsPresenter {
         this.#renderComments();
         break;
     }
-    // if (updateType === UpdateType.PATCH) {
-    //   switch (typeof data) {
-    //     case 'string':
-    //       remove(this.#renderedComments.get(data));
-    //       this.#renderedComments.delete(data);
-    //       this.#commentsSection.setCommentsCount(this.#renderedComments.size);
-    //       break;
-    //     default:
-    //       this.#renderComment(data);
-    //       this.#commentsSection.setCommentsCount(this.#renderedComments.size);
-    //       break;
-    //   }
-    // }
   };
 
-  #handleViewAction = (actionType, updateType, updateData) => {
+  #handleViewAction = (actionType, updateComment) => {
     switch (actionType) {
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(updateType, this.#film, updateData);
+        this.#commentsModel.addComment(UpdateType.PATCH, this.#film, updateComment);
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(updateType, this.#film, updateData);
+        this.#commentsModel.deleteComment(UpdateType.PATCH, updateComment);
         break;
     }
   };

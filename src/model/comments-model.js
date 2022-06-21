@@ -29,10 +29,19 @@ export default class CommentsModel extends Observable {
     return this.#comments;
   }
 
-  createComment = async (updateType, film, update) => {
+  addComment = async (updateType, film, update) => {
     try {
-      const response = await this.#commentsApiService.createComment(film, update);
-      const newComment = this.#adaptToClient(response);
+      const response = await this.#commentsApiService.addComment(film, update);
+      const commentsSet = {...response.comments};
+      let newComment = null;
+
+      for (const key in commentsSet) {
+        const result = this.#comments.findIndex((el) => commentsSet[key].id === el.id);
+        if (result === -1) {
+          newComment = commentsSet[key];
+          break;
+        }
+      }
       this.#comments = [
         ...this.#comments,
         newComment,
@@ -43,7 +52,7 @@ export default class CommentsModel extends Observable {
     }
   };
 
-  deleteComment = async (updateType, film, update) => {
+  deleteComment = async (updateType, update) => {
     const updateId = update.id;
     const index = this.#comments.findIndex((comment) => comment.id === update.id);
 
@@ -51,7 +60,7 @@ export default class CommentsModel extends Observable {
       throw new Error('Can\'t delete unexisting comment');
     }
     try {
-      const response = await this.#commentsApiService.createComment(film, update);
+      const response = await this.#commentsApiService.deleteComment(update);
       if (response.ok) {
         this.#comments = [
           ...this.#comments.slice(0, index),

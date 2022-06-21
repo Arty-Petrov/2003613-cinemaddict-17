@@ -30,21 +30,17 @@ export default class FilmPopupPresenter {
   }
 
   init = (filmData, callback) => {
+    if (this.#filmData !== null && this.#filmData.id === filmData.id) {
+      return;
+    }
     this.#filmData = filmData;
     this.#filmsModel = new FilmsModel();
     this.#filmDetailsHanler = callback;
     this.#existFilmPopup = this.#filmPopup;
     this.#renderPopup();
+    this.#renderDetails();
+    this.#renderComments();
 
-    this.#filmDetailsPresenter = new FilmDetailsPresenter(
-      this.#filmPopup.filmDetailsContainer
-    );
-    this.#filmDetailsPresenter.init(this.#filmData, this.#filmDetailsHanler);
-
-    this.#filmCommentsPresenter = new FilmCommentsPresenter(
-      this.#filmPopup.filmCommentsContainer
-    );
-    this.#filmCommentsPresenter.init(this.#filmData);
     this.#filmsModel.addObserver(this.#handleModelEvent);
   };
 
@@ -68,6 +64,23 @@ export default class FilmPopupPresenter {
     }
   };
 
+  #renderDetails = () => {
+    this.#filmDetailsPresenter = new FilmDetailsPresenter(
+      this.#filmPopup.filmDetailsContainer
+    );
+    this.#filmDetailsPresenter.init(this.#filmData, this.#filmDetailsHanler);
+  };
+
+  #renderComments = () => {
+    if (this.#filmCommentsPresenter){
+      this.#filmCommentsPresenter.destroy();
+    }
+    this.#filmCommentsPresenter = new FilmCommentsPresenter(
+      this.#filmPopup.filmCommentsContainer
+    );
+    this.#filmCommentsPresenter.init(this.#filmData);
+  };
+
   #handleClosePopup = () => {
     document.removeEventListener('keydown', this.#handleEscKeydown);
     this.destroy();
@@ -79,10 +92,19 @@ export default class FilmPopupPresenter {
     }
   };
 
-  #handleModelEvent = (updateType, data) => {
-    if (updateType === UpdateType.MINOR) {
-      this.#filmData = data;
-      this.#filmDetailsPresenter.init(this.#filmData, this.#filmDetailsHanler);
+  #handleModelEvent = async (updateType, data) => {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.#filmCommentsPresenter.updateFilmInfo(data);
+        break;
+      case UpdateType.MINOR:
+        this.#filmData = data;
+        this.#filmDetailsPresenter.init(this.#filmData, this.#filmDetailsHanler);
+        break;
+      case UpdateType.MAJOR:
+        break;
+      case UpdateType.INIT:
+        break;
     }
   };
 }

@@ -1,5 +1,7 @@
-import { UserAction, UpdateType } from '../enum';
+import { UserAction } from '../enum';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+
+const EMOTION_PATH = './images/emoji/';
 
 const createFilmCommentFormTemplate = () => (
   `<div class="film-details__new-comment">
@@ -73,8 +75,7 @@ export default class FilmCommentFormView extends AbstractStatefulView {
       }
       evt.preventDefault();
       this.updateElement(FilmCommentFormView.initState);
-      this._callback.newCommentEnterKeydown(UserAction.ADD_COMMENT, UpdateType.PATCH, commentData);
-      this.element.scrollIntoView(top);
+      this._callback.newCommentEnterKeydown(UserAction.ADD_COMMENT, commentData);
       commentData = {};
       this._state = {};
     }
@@ -83,7 +84,7 @@ export default class FilmCommentFormView extends AbstractStatefulView {
   #createNewCommentEmotionLabel = (emotionValue) => {
     const emotionImageSize = 55;
     const emotionLableElement = document.createElement('img');
-    emotionLableElement.src = `images/emoji/${emotionValue}.png`;
+    emotionLableElement.src = `${EMOTION_PATH}${emotionValue}.png`;
     emotionLableElement.width = emotionImageSize;
     emotionLableElement.height = emotionImageSize;
     emotionLableElement.alt = `emoji-${emotionValue}`;

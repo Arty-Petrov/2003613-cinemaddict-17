@@ -1,7 +1,7 @@
 import he from 'he';
 import AbstractView from '../framework/view/abstract-view';
 import { humanizeUTC } from '../utils/util';
-import { CommentEmotion, UserAction, UpdateType } from '../enum';
+import { CommentEmotion, UserAction } from '../enum';
 
 const EMOTION_PATH = './images/emoji/';
 
@@ -31,17 +31,17 @@ const createCommentTemplate = (commentsData) => {
 };
 
 export default class FilmCommentView extends AbstractView {
-  #commentData = null;
+  #comment = null;
   #deleteCommentButton = null;
 
-  constructor(commentData) {
+  constructor(comment) {
     super();
-    this.#commentData = commentData;
+    this.#comment = comment;
     this.#deleteCommentButton = this.element.querySelector('.film-details__comment-delete');
   }
 
   get template() {
-    return createCommentTemplate(this.#commentData);
+    return createCommentTemplate(this.#comment);
   }
 
   setDeleteCommentClickHandler(callback) {
@@ -51,7 +51,6 @@ export default class FilmCommentView extends AbstractView {
 
   #deleteCommentClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.deleteCommentClick(UserAction.DELETE_COMMENT, UpdateType.PATCH, this.#commentData);
-    this.element.scrollIntoView(top);
+    this._callback.deleteCommentClick(UserAction.DELETE_COMMENT, this.#comment);
   };
 }

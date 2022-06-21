@@ -40,7 +40,7 @@ const createFilmDetailsTemplate = (filmData) => {
     return genresList.join('\n');
   };
 
-  const getControlActivityClass = (userDetail) => (userDetail) ? 'film-details__control-button--active' : '';
+  const getControlActivityClass = (userDetail) => (userDetail) ? CONTROL_ITEM_ACTIVE_CLASS : '';
 
   return (
     `<div>
