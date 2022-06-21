@@ -44,6 +44,7 @@ export default class FilmPopupPresenter {
     this.#filmCommentsPresenter = new FilmCommentsPresenter(
       this.#filmPopup.filmCommentsContainer
     );
+    this.#filmCommentsPresenter.init(this.#filmData);
     this.#filmsModel.addObserver(this.#handleModelEvent);
   };
 
