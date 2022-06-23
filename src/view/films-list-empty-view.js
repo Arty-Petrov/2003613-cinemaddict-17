@@ -1,9 +1,19 @@
+import { EmptyListMessage } from '../enum';
 import AbstractView from '../framework/view/abstract-view';
 
-const createFilmsListEmptyTemplate = () => '<h2 class="films-list__title">There are no movies in our database</h2>';
+const createFilmsListEmptyTemplate = (filterType) => {
+  const message = EmptyListMessage[filterType.toUpperCase()];
+  return `<h2 class="films-list__title">${message}</h2>`;
+};
 
 export default class FilmsListEmptyView extends AbstractView {
-  get template() {
-    return createFilmsListEmptyTemplate();
+  #filterType = null;
+
+  init = (filterType) => {
+    this.#filterType = filterType;
+  };
+
+  get template () {
+    return createFilmsListEmptyTemplate(this.#filterType);
   }
 }

@@ -59,3 +59,29 @@ export const SortType = {
   DATE: 'date',
   RATING: 'rating',
 };
+
+export const UserAction = {
+  ADD_COMMENT: 'ADD_COMMENT',
+  DELETE_COMMENT: 'DELETE_COMMENT',
+  UPDATE_FILM: 'UPDATE_FILM',
+};
+
+export const UserDetails = {
+  WATCHLIST: 'watchlist',
+  WATCHED: 'watched',
+  FAVORITE: 'favorite',
+};
+
+export const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+  INIT: 'INIT',
+};
+
+export const EmptyListMessage = {
+  ALL: 'There are no movies in our database',
+  WATCHLIST: 'There are no movies to watch now',
+  HISTORY: 'There are no watched movies now',
+  FAVORITES: 'There are no favorite movies now',
+};

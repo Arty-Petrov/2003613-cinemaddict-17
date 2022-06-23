@@ -1,6 +1,8 @@
 import AbstractView from '../framework/view/abstract-view';
 import { SortType } from '../enum';
 
+const ITEM_ACTIVE_CLASS = 'sort__button--active';
+
 const createMainSortTemplate = () => (
   `<ul class="sort">
     <li><a href="#" class="sort__button sort__button--active" data-sort-type="${SortType.DEFAULT}">Sort by default</a></li>
@@ -28,7 +30,7 @@ export default class MainSortView extends AbstractView {
     evt.preventDefault();
     const evtSortType = evt.target.dataset.sortType;
     this._callback.sortTypeChange(evtSortType);
-    this.element.querySelector('.sort__button--active').classList.remove('sort__button--active');
-    this.element.querySelector(`[data-sort-type="${evtSortType}"]`).classList.add('sort__button--active');
+    this.element.querySelector(`.${ITEM_ACTIVE_CLASS}`).classList.remove(ITEM_ACTIVE_CLASS);
+    this.element.querySelector(`[data-sort-type="${evtSortType}"]`).classList.add(ITEM_ACTIVE_CLASS);
   };
 }

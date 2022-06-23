@@ -1,96 +1,62 @@
 import FilmCardView from '../view/film-card-view';
-import FilmDetailsPresenter from './film-details-presenter';
+import FilmPopupPresenter from './film-popup-presenter';
 import { render, replace, remove } from '../framework/render';
+import { UpdateType, UserAction, UserDetails } from '../enum';
 
 export default class FilmCardPresenter {
-  #filmId = null;
   #filmData = null;
-  #filmCommentsData = null;
-  #updateUserDetails = null;
+  #handleUserDetailsActions = null;
 
+  #filmCard = null;
   #filmCardContainer = null;
-  #filmCardComponent = null;
-  #existFilmCardComponent = null;
 
-  #filmDetailsPopupComponent = null;
+  #filmPopup = null;
 
   constructor(filmCardContainer, callback) {
     this.#filmCardContainer = filmCardContainer;
-    this.#updateUserDetails = callback;
+    this.#handleUserDetailsActions = callback;
   }
 
-  init =  (filmData, filmCommentsData) => {
+  init = (filmData) => {
     this.#filmData = filmData;
-    this.#filmCommentsData = filmCommentsData;
-    this.#filmCardComponent = new FilmCardView(this.#filmData);
-    this.#filmCardComponent.setShowFilmDetailsHandler(this.#handleShowFilmDetail);
-    this.#filmCardComponent.setAddToWatchListHandler(this.#handleAddToWatchList);
-    this.#filmCardComponent.setMarkAsWhatchedHandler(this.#handleMarkAsWhatched);
-    this.#filmCardComponent.setMarkAsFavoriteHandler(this.#handleMarkAsFavorite);
+    const prevFilmCardComponent = this.#filmCard;
 
-    if (this.#existFilmCardComponent === null){
-      render (this.#filmCardComponent, this.#filmCardContainer);
+    this.#filmCard = new FilmCardView(this.#filmData);
+    this.#filmCard.setShowFilmDetailsHandler(this.#handleShowFilmDetail);
+    this.#filmCard.setUserDetailsControlsHandler(this.#handleCardViewActions);
+
+    if (prevFilmCardComponent === null){
+      render (this.#filmCard, this.#filmCardContainer);
       return;
     }
 
-    if (this.filmCardContainer.contains(this.#existFilmCardComponent.element)){
-      replace(this.#filmCardComponent,this.#existFilmCardComponent);
-    }
-
-    remove(this.#existFilmCardComponent);
-  };
-
-  #handleShowFilmDetail = () => {
-    const buttonHandlers = [
-      this.#handleAddToWatchList,
-      this.#handleMarkAsWhatched,
-      this.#handleMarkAsFavorite,
-    ];
-
-    this.#filmDetailsPopupComponent = new FilmDetailsPresenter();
-    this.#filmDetailsPopupComponent.init(this.#filmData, this.#filmCommentsData, buttonHandlers);
-    this.#filmDetailsPopupComponent = null;
-  };
-
-  #handleAddToWatchList = () => {
-    const inWatchlist = !this.#filmData.userDetails.watchlist;
-    this.#filmData.userDetails.watchlist = inWatchlist;
-
-    const dataToUpdate = {};
-    dataToUpdate['id'] = this.#filmData.id;
-    dataToUpdate['watchlist'] = inWatchlist;
-
-    this.#updateUserDetails(this.#filmData.id, dataToUpdate);
-    this.#filmCardComponent.setAddToWatchList(inWatchlist);
-  };
-
-  #handleMarkAsWhatched = () => {
-    const alreadyWatched = !this.#filmData.userDetails.alreadyWatched;
-    this.#filmData.userDetails.alreadyWatched = alreadyWatched;
-    const now = new Date();
-
-    const dataToUpdate = {};
-    dataToUpdate['id'] = this.#filmData.id;
-    dataToUpdate['alreadyWatched'] = alreadyWatched;
-    dataToUpdate['watchingDate'] = alreadyWatched ? now : null;
-
-    this.#updateUserDetails(this.#filmData.id, dataToUpdate);
-    this.#filmCardComponent.setMarkAsWhatched(alreadyWatched);
-  };
-
-  #handleMarkAsFavorite = () => {
-    const isFavorite = !this.#filmData.userDetails.favorite;
-    this.#filmData.userDetails.favorite = isFavorite;
-
-    const dataToUpdate = {};
-    dataToUpdate['id'] = this.#filmData.id;
-    dataToUpdate['favorite'] = isFavorite;
-
-    this.#updateUserDetails(this.#filmData.id, dataToUpdate);
-    this.#filmCardComponent.setMarkAsFavorite(isFavorite);
+    replace(this.#filmCard, prevFilmCardComponent);
+    remove(prevFilmCardComponent);
   };
 
   destroy = () => {
-    remove(this.#filmCardComponent);
+    remove(this.#filmCard);
+    this.#filmCard = null;
+  };
+
+  #handleShowFilmDetail = () => {
+    this.#filmPopup = new FilmPopupPresenter();
+    this.#filmPopup.init(this.#filmData, this.#handleCardViewActions);
+  };
+
+  #handleCardViewActions = (detailsType) => {
+    switch (detailsType) {
+      case UserDetails.WATCHLIST:
+        this.#filmData.userDetails.watchlist = !this.#filmData.userDetails.watchlist;
+        break;
+      case UserDetails.WATCHED:
+        this.#filmData.userDetails.alreadyWatched = !this.#filmData.userDetails.alreadyWatched;
+        this.#filmData.userDetails.watchingDate = (this.#filmData.userDetails.alreadyWatched) ? new Date() : null;
+        break;
+      case UserDetails.FAVORITE:
+        this.#filmData.userDetails.favorite = !this.#filmData.userDetails.favorite;
+        break;
+    }
+    this.#handleUserDetailsActions(UserAction.UPDATE_FILM ,UpdateType.MINOR, this.#filmData);
   };
 }
