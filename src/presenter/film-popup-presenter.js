@@ -71,7 +71,9 @@ export default class FilmPopupPresenter {
 
   #renderDetails = () => {
     this.#filmDetailsPresenter = new FilmDetailsPresenter(
-      this.#filmPopup.filmDetailsContainer, this.#handleViewAction);
+      this.#filmPopup.filmDetailsContainer,
+      this.#handleViewAction
+    );
     this.#filmDetailsPresenter.init(this.#filmData);
   };
 
@@ -80,7 +82,8 @@ export default class FilmPopupPresenter {
       this.#filmCommentsPresenter.destroy();
     }
     this.#filmCommentsPresenter = new FilmCommentsPresenter(
-      this.#filmPopup.filmCommentsContainer, this.#handleFilmCardActions
+      this.#filmPopup.filmCommentsContainer,
+      this.#handleFilmCardActions
     );
     this.#filmCommentsPresenter.init(this.#filmData);
   };

@@ -61,20 +61,8 @@ export default class FilmCommentFormView extends AbstractStatefulView {
     return createFilmCommentFormTemplate(this._state);
   }
 
-  static initState = () => ({
-    isSaving: false,
-    comment: null,
-    emotion: null,
-  });
-
   _restoreHandlers = () => {
     this.#setInnerHandlers();
-  };
-
-  static convertStateToData = (state) => {
-    const commentData =  {...state};
-    delete commentData.isSaving;
-    return commentData;
   };
 
   reset = () => {
@@ -144,5 +132,17 @@ export default class FilmCommentFormView extends AbstractStatefulView {
 
     this.#emotionSelector = this.element.querySelector('.film-details__emoji-list');
     this.#emotionSelector.addEventListener('click', this.#emotionSelectorClickHandler);
+  };
+
+  static initState = () => ({
+    isSaving: false,
+    comment: null,
+    emotion: null,
+  });
+
+  static convertStateToData = (state) => {
+    const commentData =  {...state};
+    delete commentData.isSaving;
+    return commentData;
   };
 }

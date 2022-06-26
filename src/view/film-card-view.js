@@ -73,16 +73,6 @@ export default class FilmCardView extends AbstractStatefulView {
     return this.element.querySelector(`.${CONTROL_GROUP_CLASS}`);
   }
 
-  static convertFilmToState = (film) => ({...film,
-    isDisabled: false,
-  });
-
-  static convertStateToFilm = (state) => {
-    const film = {...state};
-    delete film.isDisabled;
-    return film;
-  };
-
   _restoreHandlers = () => {
     this.#setInnerHandlers();
   };
@@ -91,7 +81,6 @@ export default class FilmCardView extends AbstractStatefulView {
     this.updateElement(
       FilmCardView.convertFilmToState(film),
     );
-    // this.#setInnerHandlers();
   };
 
   setShowFilmDetailsHandler(callback) {
@@ -166,4 +155,15 @@ export default class FilmCardView extends AbstractStatefulView {
       }
     });
   };
+
+  static convertFilmToState = (film) => ({...film,
+    isDisabled: false,
+  });
+
+  static convertStateToFilm = (state) => {
+    const film = {...state};
+    delete film.isDisabled;
+    return film;
+  };
 }
+

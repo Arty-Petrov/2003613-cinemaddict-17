@@ -44,16 +44,6 @@ export default class FilmCommentView extends AbstractStatefulView {
     return createCommentTemplate(this._state);
   }
 
-  static convertCommentToState = (commentData) => ({...commentData,
-    isDeleting: false,
-  });
-
-  static convertStateToComment = (state) => {
-    const commentData = {...state};
-    delete commentData.isDeleting;
-    return commentData;
-  };
-
   _restoreHandlers = () => {
     this.#setInnerHandlers();
   };
@@ -70,5 +60,15 @@ export default class FilmCommentView extends AbstractStatefulView {
 
   #setInnerHandlers = () => {
     this.#deleteCommentButton = this.element.querySelector('.film-details__comment-delete');
+  };
+
+  static convertCommentToState = (commentData) => ({...commentData,
+    isDeleting: false,
+  });
+
+  static convertStateToComment = (state) => {
+    const commentData = {...state};
+    delete commentData.isDeleting;
+    return commentData;
   };
 }

@@ -38,11 +38,11 @@ export default class FilmsModel extends Observable{
     }
 
     const index = this.#films.findIndex((film) => film.id === update.id);
-    const updatedFilm = this.#films[index];
 
     if (index === -1) {
       throw new Error('Can\'t update unexisting film');
     }
+    const updatedFilm = this.#films[index];
     this._notify(updateType, updatedFilm);
   };
 
