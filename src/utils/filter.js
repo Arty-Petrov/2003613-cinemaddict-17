@@ -10,7 +10,7 @@ export const getTopRated = (films, count = 2) => {
     return [];
   }
   if (hasUnicValues.length === filmsToSort.length) {
-    return getRandomArrayRange(filmsToSort, 2);
+    return getRandomArrayRange(filmsToSort, count);
   }
   const sortRated = (a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating;
   return filmsToSort.sort(sortRated).slice(0, count);
@@ -24,7 +24,7 @@ export const getMostCommented = (films, count = 2) => {
     return [];
   }
   if (hasUnicValues.length === filmsToSort.length) {
-    return getRandomArrayRange(filmsToSort, 2);
+    return getRandomArrayRange(filmsToSort, count);
   }
   const sortCommented = (a, b) =>  b.comments.length - a.comments.length;
   return filmsToSort.sort(sortCommented).slice(0, count);
