@@ -1,11 +1,11 @@
 import FilmCardView from '../view/film-card-view';
 import FilmPopupPresenter from './film-popup-presenter';
 import { render, replace, remove } from '../framework/render';
-import { UpdateType, UserAction, UserDetails } from '../enum';
+import { UpdateType, UserAction } from '../utils/enum';
 
 export default class FilmCardPresenter {
   #filmData = null;
-  #handleUserDetailsActions = null;
+  #handleFilmCardActions = null;
 
   #filmCard = null;
   #filmCardContainer = null;
@@ -14,7 +14,7 @@ export default class FilmCardPresenter {
 
   constructor(filmCardContainer, callback) {
     this.#filmCardContainer = filmCardContainer;
-    this.#handleUserDetailsActions = callback;
+    this.#handleFilmCardActions = callback;
   }
 
   init = (filmData) => {
@@ -22,8 +22,8 @@ export default class FilmCardPresenter {
     const prevFilmCardComponent = this.#filmCard;
 
     this.#filmCard = new FilmCardView(this.#filmData);
-    this.#filmCard.setShowFilmDetailsHandler(this.#handleShowFilmDetail);
-    this.#filmCard.setUserDetailsControlsHandler(this.#handleCardViewActions);
+    this.#filmCard.setShowFilmDetailsHandler(this.#handleShowPopup);
+    this.#filmCard.setUserDetailsControlsHandler(this.#handleViewActions);
 
     if (prevFilmCardComponent === null){
       render (this.#filmCard, this.#filmCardContainer);
@@ -32,6 +32,9 @@ export default class FilmCardPresenter {
 
     replace(this.#filmCard, prevFilmCardComponent);
     remove(prevFilmCardComponent);
+    if (this.#filmPopup !== null) {
+      this.#filmPopup.init(this.#filmData, this.#handleViewActions);
+    }
   };
 
   destroy = () => {
@@ -39,24 +42,29 @@ export default class FilmCardPresenter {
     this.#filmCard = null;
   };
 
-  #handleShowFilmDetail = () => {
-    this.#filmPopup = new FilmPopupPresenter();
-    this.#filmPopup.init(this.#filmData, this.#handleCardViewActions);
+  setSaving = (userDetailsType) => {
+    this.#filmCard.updateElement({
+      isDisabled: userDetailsType,
+    });
   };
 
-  #handleCardViewActions = (detailsType) => {
-    switch (detailsType) {
-      case UserDetails.WATCHLIST:
-        this.#filmData.userDetails.watchlist = !this.#filmData.userDetails.watchlist;
-        break;
-      case UserDetails.WATCHED:
-        this.#filmData.userDetails.alreadyWatched = !this.#filmData.userDetails.alreadyWatched;
-        this.#filmData.userDetails.watchingDate = (this.#filmData.userDetails.alreadyWatched) ? new Date() : null;
-        break;
-      case UserDetails.FAVORITE:
-        this.#filmData.userDetails.favorite = !this.#filmData.userDetails.favorite;
-        break;
+  setAborting = () => {
+    const resetFormState = () => {
+      this.#filmCard.reset(this.#filmData);
+    };
+
+    this.#filmCard.shake(resetFormState);
+  };
+
+  #handleShowPopup = () => {
+    if (FilmPopupPresenter.instance === null){
+      this.#filmPopup = new FilmPopupPresenter();
     }
-    this.#handleUserDetailsActions(UserAction.UPDATE_FILM ,UpdateType.MINOR, this.#filmData);
+    this.#filmPopup = FilmPopupPresenter.instance;
+    this.#filmPopup.init(this.#filmData, this.#handleFilmCardActions,);
+  };
+
+  #handleViewActions = (updateData, userDetailsType) => {
+    this.#handleFilmCardActions(UserAction.UPDATE_DETAILS, UpdateType.MINOR, updateData, userDetailsType);
   };
 }

@@ -1,7 +1,7 @@
 import he from 'he';
-import AbstractView from '../framework/view/abstract-view';
-import { humanizeUTC } from '../utils/util';
-import { CommentEmotion, UserAction } from '../enum';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+import { getHumanTimeFromDate } from '../utils/util';
+import { CommentEmotion, UserAction } from '../utils/enum';
 
 const EMOTION_PATH = './images/emoji/';
 
@@ -11,8 +11,8 @@ const createCommentTemplate = (commentsData) => {
     comment,
     date,
     emotion,
+    isDeleting,
   } = commentsData;
-
   return (
     `<li class="film-details__comment">
       <span class="film-details__comment-emoji">
@@ -22,27 +22,41 @@ const createCommentTemplate = (commentsData) => {
         <p class="film-details__comment-text">${he.encode(comment)}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
-          <span class="film-details__comment-day">${humanizeUTC(date, 'YYYY/MM/D HH:MM')}</span>
-          <button class="film-details__comment-delete">Delete</button>
+          <span class="film-details__comment-day">${getHumanTimeFromDate(date)}</span>
+          <button class="film-details__comment-delete" ${(isDeleting) ? 'disabled': ''}>${(isDeleting) ? 'Deleting': 'Delete'}</button>
         </p>
       </div>
     </li>`
   );
 };
 
-export default class FilmCommentView extends AbstractView {
+export default class FilmCommentView extends AbstractStatefulView {
   #comment = null;
   #deleteCommentButton = null;
 
-  constructor(comment) {
+  constructor(commentData) {
     super();
-    this.#comment = comment;
-    this.#deleteCommentButton = this.element.querySelector('.film-details__comment-delete');
+    this._state = FilmCommentView.convertCommentToState(commentData);
+    this.#setInnerHandlers();
   }
 
   get template() {
-    return createCommentTemplate(this.#comment);
+    return createCommentTemplate(this._state);
   }
+
+  static convertCommentToState = (commentData) => ({...commentData,
+    isDeleting: false,
+  });
+
+  static convertStateToComment = (state) => {
+    const commentData = {...state};
+    delete commentData.isDeleting;
+    return commentData;
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+  };
 
   setDeleteCommentClickHandler(callback) {
     this._callback.deleteCommentClick = callback;
@@ -51,6 +65,10 @@ export default class FilmCommentView extends AbstractView {
 
   #deleteCommentClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.deleteCommentClick(UserAction.DELETE_COMMENT, this.#comment);
+    this._callback.deleteCommentClick(UserAction.DELETE_COMMENT, FilmCommentView.convertStateToComment(this._state));
+  };
+
+  #setInnerHandlers = () => {
+    this.#deleteCommentButton = this.element.querySelector('.film-details__comment-delete');
   };
 }

@@ -1,11 +1,13 @@
-import AbstractView from '../framework/view/abstract-view';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import { convertMinutesToHM, cutStringLength, humanizeUTC } from '../utils/util';
+import { UserDetails } from '../utils/enum';
 
+const CLICK_ARIA_CLASS = 'film-card__link';
+const CONTROL_GROUP_CLASS = 'film-card__controls';
 const CONTROL_ITEM_CLASS = 'film-card__controls-item';
-const CONTROL_ITEM_ACTIVE_CLASS = 'film-details__control-button--active';
 const DESCRIPTION_LENGTH_LIMIT = 140;
 
-const createFilmCardTemplate = (filmData) => {
+const createFilmCardTemplate = (state) => {
 
   const {
     comments,
@@ -25,7 +27,8 @@ const createFilmCardTemplate = (filmData) => {
       alreadyWatched,
       favorite,
     },
-  } = filmData;
+    isDisabled,
+  } = state;
 
   const getControlActivityClass = (userDetail) => (userDetail) ? 'film-card__controls-item--active' : '';
 
@@ -44,29 +47,52 @@ const createFilmCardTemplate = (filmData) => {
         <span class="film-card__comments">${comments.length} ${(comments.length === 1) ? 'comment': 'comments'}</span>
       </a>
       <div class="film-card__controls">
-        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${getControlActivityClass(watchlist)}" type="button" id="watchlist">Add to watchlist</button>
-        <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${getControlActivityClass(alreadyWatched)}" type="button" id="watched">Mark as watched</button>
-        <button class="film-card__controls-item film-card__controls-item--favorite ${getControlActivityClass(favorite)}" type="button" id="favorite">Mark as favorite</button>
+        <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${getControlActivityClass(watchlist)}" type="button" id="watchlist" ${(isDisabled === 'watchlist') ? 'disabled': ''}>Add to watchlist</button>
+        <button class="film-card__controls-item film-card__controls-item--mark-as-watched ${getControlActivityClass(alreadyWatched)}" type="button" id="watched" ${(isDisabled === 'watched') ? 'disabled': ''}>Mark as watched</button>
+        <button class="film-card__controls-item film-card__controls-item--favorite ${getControlActivityClass(favorite)}" type="button" id="favorite"  ${(isDisabled === 'favorite') ? 'disabled': ''}>Mark as favorite</button>
       </div>
     </article>`
   );
 };
 
-export default class FilmCardView extends AbstractView {
-  #filmData = null;
+export default class FilmCardView extends AbstractStatefulView {
   #showFilmDetailsClickArea = null;
   #userDetailsControls = null;
 
   constructor(filmData) {
     super();
-    this.#filmData = filmData;
-    this.#showFilmDetailsClickArea = this.element.querySelector('.film-card__link');
-    this.#userDetailsControls = this.element.querySelector('.film-card__controls');
+    this._state = FilmCardView.convertFilmToState(filmData);
+    this.#setInnerHandlers();
   }
 
   get template() {
-    return createFilmCardTemplate(this.#filmData);
+    return createFilmCardTemplate(this._state);
   }
+
+  get controls() {
+    return this.element.querySelector(`.${CONTROL_GROUP_CLASS}`);
+  }
+
+  static convertFilmToState = (film) => ({...film,
+    isDisabled: false,
+  });
+
+  static convertStateToFilm = (state) => {
+    const film = {...state};
+    delete film.isDisabled;
+    return film;
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+  };
+
+  reset = (film) => {
+    this.updateElement(
+      FilmCardView.convertFilmToState(film),
+    );
+    // this.#setInnerHandlers();
+  };
 
   setShowFilmDetailsHandler(callback) {
     this._callback.showFilmDetailsClick = callback;
@@ -83,14 +109,61 @@ export default class FilmCardView extends AbstractView {
     this.#userDetailsControls.addEventListener('click', this.#userDetailsControlsHandler);
   }
 
+  #setInnerHandlers = () => {
+    this.#showFilmDetailsClickArea = this.element.querySelector(`.${CLICK_ARIA_CLASS}`);
+    this.#userDetailsControls = this.element.querySelector(`.${CONTROL_GROUP_CLASS}`);
+  };
+
   #userDetailsControlsHandler = (evt) => {
     if (!evt.target.classList.contains(CONTROL_ITEM_CLASS)){
       return;
     }
     evt.preventDefault();
     const userDetailId = evt.target.id;
-    this._callback.userDetailsControlsClick(userDetailId);
-    const buttonElement = this.element.querySelector(`#${userDetailId}`);
-    buttonElement.classList.toggle(CONTROL_ITEM_ACTIVE_CLASS);
+    switch (userDetailId) {
+      case UserDetails.WATCHLIST:
+        this.#toggleWatchlist();
+        break;
+      case UserDetails.WATCHED:
+        this.#toggleWatched();
+        break;
+      case UserDetails.FAVORITE:
+        this.#toggleFavorite();
+        break;
+    }
+    this._callback.userDetailsControlsClick(FilmCardView.convertStateToFilm(this._state), userDetailId);
+  };
+
+  #toggleWatchlist = () => {
+    this.updateElement({
+      userDetails:{
+        watchlist: !this._state.userDetails.watchlist,
+        alreadyWatched: this._state.userDetails.alreadyWatched,
+        watchingDate: this._state.userDetails.watchingDate,
+        favorite: this._state.userDetails.favorite,
+      }
+    });
+  };
+
+  #toggleWatched = () => {
+    this.updateElement({
+      userDetails:{
+        watchlist: this._state.userDetails.watchlist,
+        alreadyWatched: !this._state.userDetails.alreadyWatched,
+        watchingDate: (this._state.userDetails.alreadyWatched) ? new Date() : null,
+        favorite: this._state.userDetails.favorite,
+      }
+    });
+  };
+
+  #toggleFavorite =() => {
+    this.updateElement({
+      userDetails:{
+        watchlist: this._state.userDetails.watchlist,
+        alreadyWatched: this._state.userDetails.alreadyWatched,
+        watchingDate: this._state.userDetails.watchingDate,
+        favorite: !this._state.userDetails.favorite,
+      }
+    });
   };
 }

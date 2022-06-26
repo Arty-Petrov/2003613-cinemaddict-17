@@ -63,7 +63,7 @@ export const SortType = {
 export const UserAction = {
   ADD_COMMENT: 'ADD_COMMENT',
   DELETE_COMMENT: 'DELETE_COMMENT',
-  UPDATE_FILM: 'UPDATE_FILM',
+  UPDATE_DETAILS: 'UPDATE_DETAILS',
 };
 
 export const UserDetails = {

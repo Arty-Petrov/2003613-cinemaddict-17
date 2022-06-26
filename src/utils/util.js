@@ -1,25 +1,11 @@
 import dayjs from 'dayjs';
+import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 
-export const getRandomPositiveInteger = (a, b) => {
+const getRandomPositiveInteger = (a, b) => {
   const lower = Math.ceil(Math.min(Math.abs(a), Math.abs(b)));
   const upper = Math.floor(Math.max(Math.abs(a), Math.abs(b)));
   const result = Math.random() * (upper - lower + 1) + lower;
   return Math.floor(result);
-};
-
-export const getRandomPositiveFloat = (a, b, digits = 1) => {
-  const lower = Math.min(Math.abs(a), Math.abs(b));
-  const upper = Math.max(Math.abs(a), Math.abs(b));
-  const result = Math.random() * (upper - lower) + lower;
-  return +result.toFixed(digits);
-};
-
-export const getRandomArrayItem = (array) => array[getRandomPositiveInteger(0, array.length - 1)];
-
-export const getRandomArrayPart = (array) => {
-  const max = getRandomPositiveInteger(0, array.length - 1);
-  const min = getRandomPositiveInteger(0, max);
-  return array.slice(min, max + 1);
 };
 
 export const getRandomArrayRange = (array, rangeSize) => {
@@ -49,18 +35,9 @@ export const convertMinutesToHM = (minutes) => {
   return `${hoursString} ${minutesString}`;
 };
 
-export const humanizeUTC = (date, format) => dayjs(date).format(format);
-
-export const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1),
-  ];
+export const getHumanTimeFromDate = (isoTime) => {
+  dayjs.extend(relativeTimePlugin);
+  return dayjs().to(dayjs(isoTime));
 };
+
+export const humanizeUTC = (date, format) => dayjs(date).format(format);

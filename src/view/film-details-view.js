@@ -1,9 +1,6 @@
 import AbstractView from '../framework/view/abstract-view';
 import { convertMinutesToHM, humanizeUTC } from '../utils/util';
 
-const CONTROL_ITEM_CLASS = 'film-details__control-button';
-const CONTROL_ITEM_ACTIVE_CLASS = 'film-details__control-button--active';
-
 const createFilmDetailsTemplate = (filmData) => {
   const {
     filmInfo : {
@@ -23,11 +20,6 @@ const createFilmDetailsTemplate = (filmData) => {
       genre,
       description
     },
-    userDetails: {
-      watchlist,
-      alreadyWatched,
-      favorite,
-    },
   } = filmData;
 
   const genreString = (genre.length === 1) ? 'Genre' : 'Genres';
@@ -40,11 +32,8 @@ const createFilmDetailsTemplate = (filmData) => {
     return genresList.join('\n');
   };
 
-  const getControlActivityClass = (userDetail) => (userDetail) ? CONTROL_ITEM_ACTIVE_CLASS : '';
-
   return (
-    `<div>
-    <div class="film-details__info-wrap">
+    `<div class="film-details__info-wrap">
       <div class="film-details__poster">
         <img class="film-details__poster-img" src="${poster}" alt="">
 
@@ -96,41 +85,18 @@ const createFilmDetailsTemplate = (filmData) => {
 
         <p class="film-details__film-description">${description}</p>
       </div>
-      </div>
-      <section class="film-details__controls">
-        <button type="button" class="film-details__control-button ${getControlActivityClass(watchlist)} film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
-        <button type="button" class="film-details__control-button ${getControlActivityClass(alreadyWatched)} film-details__control-button--watched" id="watched" name="watched">Already watched</button>
-        <button type="button" class="film-details__control-button ${getControlActivityClass(favorite)} film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
-      </section>`);
+      </div>`);
 };
 
 export default class FilmDetailsView extends AbstractView {
   #filmData = null;
-  #userDetailsControls = null;
 
   constructor(filmData) {
     super();
     this.#filmData = filmData;
-    this.#userDetailsControls = this.element.querySelector('.film-details__controls');
   }
 
   get template() {
     return createFilmDetailsTemplate(this.#filmData);
   }
-
-  setUserDetailsControlsHandler(callback) {
-    this._callback.userDetailsControlsClick = callback;
-    this.#userDetailsControls.addEventListener('click', this.#userDetailsControlsHandler);
-  }
-
-  #userDetailsControlsHandler = (evt) => {
-    if (!evt.target.classList.contains(CONTROL_ITEM_CLASS)){
-      return;
-    }
-    evt.preventDefault();
-    const userDetailId = evt.target.id;
-    this._callback.userDetailsControlsClick(userDetailId);
-    const buttonElement = this.element.querySelector(`#${userDetailId}`);
-    buttonElement.classList.toggle(CONTROL_ITEM_ACTIVE_CLASS);
-  };
 }
