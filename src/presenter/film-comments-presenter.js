@@ -150,10 +150,6 @@ export default class FilmCommentsPresenter {
         this.#removeCommentFromFilmData(commentData);
         this.#handleDetailsActions(UserAction.DELETE_COMMENT, UpdateType.PATCH, this.#film);
         break;
-      case UpdateType.MINOR:
-        break;
-      case UpdateType.MAJOR:
-        break;
       case UpdateType.INIT:
         this.#renderComentsSection();
         this.#renderComments();

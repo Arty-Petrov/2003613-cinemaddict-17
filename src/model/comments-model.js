@@ -32,7 +32,6 @@ export default class CommentsModel extends Observable {
   addComment = async (updateType, film, update) => {
     try {
       const response = await this.#commentsApiService.addComment(film, update);
-      // console.log(response);
       const commentsSet = {...response.comments};
       const updatedDataSet = response;
       let newComment = null;

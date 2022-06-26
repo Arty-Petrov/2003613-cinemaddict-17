@@ -5,6 +5,8 @@ const CONTROL_GROUP_CLASS = 'film-details__controls';
 const CONTROL_ITEM_CLASS = 'film-details__control-button';
 const CONTROL_ITEM_ACTIVE_CLASS = 'film-details__control-button--active';
 
+const getControlActivityClass = (userDetail) => (userDetail) ? CONTROL_ITEM_ACTIVE_CLASS : '';
+
 const createFilmDetailsControlsTemplate = (state) => {
   const {
     userDetails: {
@@ -14,8 +16,6 @@ const createFilmDetailsControlsTemplate = (state) => {
     },
     isDisabled,
   } = state;
-
-  const getControlActivityClass = (userDetail) => (userDetail) ? CONTROL_ITEM_ACTIVE_CLASS : '';
 
   return (
     `<div>
@@ -40,16 +40,6 @@ export default class FilmDetailsControlsView extends AbstractStatefulView {
     return createFilmDetailsControlsTemplate(this._state);
   }
 
-  static convertFilmToState = (film) => ({...film,
-    isDisabled: false,
-  });
-
-  static convertStateToFilm = (state) => {
-    const film = {...state};
-    delete film.isDisabled;
-    return film;
-  };
-
   _restoreHandlers = () => {
     this.#setInnerHandlers();
   };
@@ -67,27 +57,6 @@ export default class FilmDetailsControlsView extends AbstractStatefulView {
 
   #setInnerHandlers = () => {
     this.#userDetailsControls = this.element.querySelector(`.${CONTROL_GROUP_CLASS}`);
-  };
-
-  #userDetailsControlsHandler = (evt) => {
-    if (!evt.target.classList.contains(CONTROL_ITEM_CLASS)){
-      return;
-    }
-    evt.preventDefault();
-    const userDetailId = evt.target.id;
-
-    switch (userDetailId) {
-      case UserDetails.WATCHLIST:
-        this.#toggleWatchlist();
-        break;
-      case UserDetails.WATCHED:
-        this.#toggleWatched();
-        break;
-      case UserDetails.FAVORITE:
-        this.#toggleFavorite();
-        break;
-    }
-    this._callback.userDetailsControlsClick(FilmDetailsControlsView.convertStateToFilm(this._state), userDetailId);
   };
 
   #toggleWatchlist = () => {
@@ -121,5 +90,36 @@ export default class FilmDetailsControlsView extends AbstractStatefulView {
         favorite: !this._state.userDetails.favorite,
       }
     });
+  };
+
+  #userDetailsControlsHandler = (evt) => {
+    if (!evt.target.classList.contains(CONTROL_ITEM_CLASS)){
+      return;
+    }
+    evt.preventDefault();
+    const userDetailId = evt.target.id;
+
+    switch (userDetailId) {
+      case UserDetails.WATCHLIST:
+        this.#toggleWatchlist();
+        break;
+      case UserDetails.WATCHED:
+        this.#toggleWatched();
+        break;
+      case UserDetails.FAVORITE:
+        this.#toggleFavorite();
+        break;
+    }
+    this._callback.userDetailsControlsClick(FilmDetailsControlsView.convertStateToFilm(this._state), userDetailId);
+  };
+
+  static convertFilmToState = (film) => ({...film,
+    isDisabled: false,
+  });
+
+  static convertStateToFilm = (state) => {
+    const film = {...state};
+    delete film.isDisabled;
+    return film;
   };
 }

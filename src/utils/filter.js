@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { FilterType } from '../utils/enum';
 import { getRandomArrayRange } from '../utils/util';
 
-export const getTwoTopRated = (films) => {
+export const getTopRated = (films, count = 2) => {
   const filmsToSort = [...films];
   const unicValues = filmsToSort.filter((el, index, array) => array.indexOf(el.filmInfo.topRated) !== index);
   const hasUnicValues = filmsToSort.length === unicValues.length;
@@ -10,13 +10,13 @@ export const getTwoTopRated = (films) => {
     return [];
   }
   if (hasUnicValues.length === filmsToSort.length) {
-    return getRandomArrayRange(filmsToSort, 2);
+    return getRandomArrayRange(filmsToSort, count);
   }
   const sortRated = (a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating;
-  return filmsToSort.sort(sortRated).slice(0,2);
+  return filmsToSort.sort(sortRated).slice(0, count);
 };
 
-export const getTwoMostCommented = (films) => {
+export const getMostCommented = (films, count = 2) => {
   const filmsToSort = [...films];
   const unicValues = filmsToSort.filter((el, index, array) => array.indexOf(el.comments.length) !== index);
   const hasUnicValues = filmsToSort.length === unicValues.length;
@@ -24,10 +24,10 @@ export const getTwoMostCommented = (films) => {
     return [];
   }
   if (hasUnicValues.length === filmsToSort.length) {
-    return getRandomArrayRange(filmsToSort, 2);
+    return getRandomArrayRange(filmsToSort, count);
   }
   const sortCommented = (a, b) =>  b.comments.length - a.comments.length;
-  return filmsToSort.sort(sortCommented).slice(0,2);
+  return filmsToSort.sort(sortCommented).slice(0, count);
 };
 
 export const filter = {

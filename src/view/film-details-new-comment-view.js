@@ -48,18 +48,8 @@ export default class FilmDetailsNewCommentView extends AbstractStatefulView {
     return createFilmDetailsNewCommentTemplate();
   }
 
-  static initState = () =>  ({
-    emotion: '',
-    comment: '',
-  });
-
   _restoreHandlers = () => {
     this.#setInnerHandlers();
-  };
-
-  static convertStateToData = (state) => {
-    const commentData =  {...state};
-    return commentData;
   };
 
   setNewCommentEnter(callback) {
@@ -124,4 +114,16 @@ export default class FilmDetailsNewCommentView extends AbstractStatefulView {
     this.#emotionSelector = this.element.querySelector('.film-details__emoji-list');
     this.#emotionSelector.addEventListener('click', this.#emotionSelectorClickHandler);
   };
+
+
+  static initState = () =>  ({
+    emotion: '',
+    comment: '',
+  });
+
+  static convertStateToData = (state) => {
+    const commentData =  {...state};
+    return commentData;
+  };
+
 }
