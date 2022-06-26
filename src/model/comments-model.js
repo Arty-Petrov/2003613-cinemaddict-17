@@ -1,5 +1,5 @@
 import Observable from '../framework/observable';
-import { UpdateType } from '../enum';
+import { UpdateType } from '../utils/enum';
 export default class CommentsModel extends Observable {
   static #instance = null;
   #commentsApiService = [];
@@ -32,7 +32,9 @@ export default class CommentsModel extends Observable {
   addComment = async (updateType, film, update) => {
     try {
       const response = await this.#commentsApiService.addComment(film, update);
+      // console.log(response);
       const commentsSet = {...response.comments};
+      const updatedDataSet = response;
       let newComment = null;
 
       for (const key in commentsSet) {
@@ -42,11 +44,12 @@ export default class CommentsModel extends Observable {
           break;
         }
       }
+      updatedDataSet.comments = newComment;
       this.#comments = [
         ...this.#comments,
         newComment,
       ];
-      this._notify(updateType, newComment);
+      this._notify(updateType, updatedDataSet);
     } catch(err) {
       throw new Error('Can\'t create comment');
     }

@@ -1,5 +1,5 @@
 import Observable from '../framework/observable.js';
-import { FilterType } from '../enum';
+import { FilterType } from '../utils/enum';
 
 
 export default class FilterModel extends Observable {

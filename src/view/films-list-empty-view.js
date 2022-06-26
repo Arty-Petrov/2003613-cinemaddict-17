@@ -1,4 +1,4 @@
-import { EmptyListMessage } from '../enum';
+import { EmptyListMessage } from '../utils/enum';
 import AbstractView from '../framework/view/abstract-view';
 
 const createFilmsListEmptyTemplate = (filterType) => {
