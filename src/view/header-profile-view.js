@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
-import { UserRank } from '../enum';
+import { UserRank } from '../utils/enum';
 
 const getWatchedFilmsCount = (filters) => filters.filter((entrie) => (entrie['name'] === 'History'))[0].count;
 

@@ -1,11 +1,10 @@
-
 import FilmsModel from '../model/films-model';
 
 import FilmDetailsPresenter from './film-details-presenter';
 import FilmCommentsPresenter from './film-comments-presenter';
 import FilmPopupView from '../view/film-popup-view';
-import { remove, render } from '../framework/render';
-import { UpdateType } from '../enum';
+import { remove, render, replace } from '../framework/render';
+import { UpdateType } from '../utils/enum';
 
 const BLOCK_SCROLL_CLASS = 'hide-overflow';
 
@@ -13,7 +12,7 @@ export default class FilmPopupPresenter {
   static #instance = null;
   #filmData = null;
   #filmsModel = null;
-  #filmDetailsHanler = null;
+  #handleFilmCardActions = null;
   #filmPopup = null;
   #existFilmPopup = null;
   #filmPopupContainer = null;
@@ -21,8 +20,10 @@ export default class FilmPopupPresenter {
   #filmCommentsPresenter = null;
 
   constructor() {
-    this.#filmPopupContainer = document.body;
     if (!FilmPopupPresenter.#instance) {
+      this.#filmsModel = new FilmsModel();
+      this.#filmsModel.addObserver(this.#handleModelPopEvent);
+      this.#filmPopupContainer = document.body;
       FilmPopupPresenter.#instance = this;
       return;
     }
@@ -34,17 +35,14 @@ export default class FilmPopupPresenter {
       return;
     }
     this.#filmData = filmData;
-    this.#filmsModel = new FilmsModel();
-    this.#filmDetailsHanler = callback;
-    this.#existFilmPopup = this.#filmPopup;
+    this.#handleFilmCardActions = callback;
     this.#renderPopup();
     this.#renderDetails();
     this.#renderComments();
-
-    this.#filmsModel.addObserver(this.#handleModelEvent);
   };
 
   destroy = () => {
+    this.#filmsModel.removeObserver(this.#handleModelPopEvent);
     this.#filmDetailsPresenter.destroy();
     this.#filmCommentsPresenter.destroy();
 
@@ -53,22 +51,28 @@ export default class FilmPopupPresenter {
     FilmPopupPresenter.#instance = null;
   };
 
+  static get instance() {
+    return this.#instance;
+  }
+
   #renderPopup = () => {
+    this.#existFilmPopup = this.#filmPopup;
+    this.#filmPopup = new FilmPopupView();
     if (!this.#existFilmPopup) {
       document.addEventListener('keydown', this.#handleEscKeydown);
-      this.#filmPopup = new FilmPopupView();
       this.#filmPopup.setCloseButtonHandler(this.#handleClosePopup);
       this.#filmPopupContainer.classList.toggle(BLOCK_SCROLL_CLASS);
       render(this.#filmPopup, this.#filmPopupContainer);
-      this.#existFilmPopup = this.#filmPopup;
+      return;
     }
+    replace(this.#filmPopup, this.#existFilmPopup);
+    remove(this.#existFilmPopup);
   };
 
   #renderDetails = () => {
     this.#filmDetailsPresenter = new FilmDetailsPresenter(
-      this.#filmPopup.filmDetailsContainer
-    );
-    this.#filmDetailsPresenter.init(this.#filmData, this.#filmDetailsHanler);
+      this.#filmPopup.filmDetailsContainer, this.#handleViewAction);
+    this.#filmDetailsPresenter.init(this.#filmData);
   };
 
   #renderComments = () => {
@@ -76,7 +80,7 @@ export default class FilmPopupPresenter {
       this.#filmCommentsPresenter.destroy();
     }
     this.#filmCommentsPresenter = new FilmCommentsPresenter(
-      this.#filmPopup.filmCommentsContainer
+      this.#filmPopup.filmCommentsContainer, this.#handleFilmCardActions
     );
     this.#filmCommentsPresenter.init(this.#filmData);
   };
@@ -92,19 +96,24 @@ export default class FilmPopupPresenter {
     }
   };
 
-  #handleModelEvent = async (updateType, data) => {
+  #handleModelPopEvent = async (updateType, updateData) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#filmCommentsPresenter.updateFilmInfo(data);
+        this.#filmCommentsPresenter.updateFilmInfo(updateData);
         break;
       case UpdateType.MINOR:
-        this.#filmData = data;
-        this.#filmDetailsPresenter.init(this.#filmData, this.#filmDetailsHanler);
+        this.#filmData = updateData;
+        this.#filmDetailsPresenter.init(updateData);
         break;
-      case UpdateType.MAJOR:
-        break;
-      case UpdateType.INIT:
-        break;
+    }
+  };
+
+  #handleViewAction = async (actionType, updateType, updateData, userDetailsType = null) => {
+    try {
+      this.#filmDetailsPresenter.setSaving(userDetailsType);
+      await this.#filmsModel.updateFilm(updateType, updateData);
+    } catch (err) {
+      this.#filmDetailsPresenter.setAborting();
     }
   };
 }

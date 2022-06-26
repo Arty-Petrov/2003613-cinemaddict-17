@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
-import { SortType } from '../enum';
+import { SortType } from '../utils/enum';
 
 const ITEM_ACTIVE_CLASS = 'sort__button--active';
 

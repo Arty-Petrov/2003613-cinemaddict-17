@@ -52,7 +52,6 @@ export default class FilmsApiService extends ApiService {
         'favorite': !!film.userDetails.favorite
       }
     };
-
     return adaptedFilm;
   };
 }

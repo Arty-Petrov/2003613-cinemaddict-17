@@ -1,5 +1,5 @@
 import Observable from '../framework/observable';
-import { UpdateType } from '../enum';
+import { UpdateType } from '../utils/enum';
 export default class FilmsModel extends Observable{
   static #instance = null;
   #filmsApiService = null;
@@ -29,14 +29,21 @@ export default class FilmsModel extends Observable{
     return this.#films;
   }
 
-  updateFilmById = async (updateType, filmId) => {
+  updateFilmComments = async (updateType, update) => {
     try {
       const films = await this.#filmsApiService.films;
       this.#films = films.map(this.#adaptToClient);
-      this._notify(updateType, this.#films[filmId]);
     } catch (error) {
-      this.#films = [];
+      throw new Error('Can\'t update unexisting film');
     }
+
+    const index = this.#films.findIndex((film) => film.id === update.id);
+    const updatedFilm = this.#films[index];
+
+    if (index === -1) {
+      throw new Error('Can\'t update unexisting film');
+    }
+    this._notify(updateType, updatedFilm);
   };
 
   updateFilm = async (updateType, update) => {
@@ -87,7 +94,6 @@ export default class FilmsModel extends Observable{
         favorite: film['user_details']['favorite']
       }
     };
-
     return adaptedFilm;
   };
 }

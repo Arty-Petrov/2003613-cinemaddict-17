@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view';
 import { humanizeUTC } from '../utils/util';
-import { CommentEmotion } from '../enum';
+import { CommentEmotion } from '../utils/enum';
 
 const EMOTION_PATH = './images/emoji/';
 

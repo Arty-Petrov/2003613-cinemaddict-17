@@ -1,55 +1,47 @@
-/* eslint-disable indent */
 import CommentsModel from '../model/comments-model';
 
 import FilmCommentView from '../view/film-comment-view';
 import FilmCommentFormView from '../view/film-comment-form-view';
 import FilmCommentsView from '../view/film-comments-view';
 
-import { render, remove } from '../framework/render';
-import { UpdateType, UserAction } from '../enum';
-import FilmsModel from '../model/films-model';
+import { render, remove, replace } from '../framework/render';
+import { UpdateType, UserAction } from '../utils/enum';
 export default class FilmCommentsPresenter {
   static #instance = null;
   #film = null;
   #filmsModel = null;
   #commentsModel = null;
   #renderedComments = new Map();
-
   #commentsSection = null;
+  #existCommentsSection = null;
   #commentsSectionContainer = null;
   #commentsListContainer = null;
   #commentForm = null;
+  #existCommentForm = null;
   #commentFormContainer = null;
 
-  constructor (container) {
+  #handleDetailsActions;
+
+  constructor (container, callback) {
+    this.#handleDetailsActions = callback;
     this.#commentsSectionContainer = container;
-    if (!FilmCommentsPresenter.#instance) {
-      this.#filmsModel = new FilmsModel();
-      this.#commentsModel = new CommentsModel();
-      FilmCommentsPresenter.#instance = this;
-      this.#commentsModel.addObserver(this.#handleModelEvent);
-      return;
-    }
-    return FilmCommentsPresenter.#instance;
+    this.#commentsModel = new CommentsModel();
   }
 
   init = (film) => {
     this.#film = film;
     this.#commentsModel.init(film);
 
-    this.#commentsSection = new FilmCommentsView(this.#film);
-    this.#commentsListContainer = this.#commentsSection.commentsListContainer;
-    this.#commentFormContainer = this.#commentsSection.element;
-
-    this.#commentForm = new FilmCommentFormView();
-
-    render(this.#commentsSection, this.#commentsSectionContainer);
-    this.#renderCommentForm();
+    this.#commentsModel.addObserver(this.#handleModelEvent);
   };
 
   destroy () {
+    this.#commentsModel.removeObserver(this.#handleModelEvent);
     this.#clearCommentsSection();
-    FilmCommentsPresenter.#instance = null;
+  }
+
+  static get instance() {
+    return this.#instance;
   }
 
   #clearCommentsSection = () => {
@@ -62,15 +54,35 @@ export default class FilmCommentsPresenter {
     remove(this.#commentsSection);
   };
 
+  #renderComentsSection = () => {
+    this.#existCommentsSection = this.#commentsSection;
+    this.#commentsSection = new FilmCommentsView(this.#film);
+
+    if (!this.#existCommentsSection) {
+      render(this.#commentsSection, this.#commentsSectionContainer);
+      return;
+    }
+    replace(this.#commentsSection, this.#existCommentsSection);
+    remove(this.#existCommentsSection);
+  };
+
   #renderComment = (comment) => {
     const commentData = comment;
     const commentComponent = new FilmCommentView(commentData);
-    commentComponent.setDeleteCommentClickHandler(this.#handleViewAction);
+    commentComponent.setDeleteCommentClickHandler(this.#handleCommentsViewActions);
     render(commentComponent, this.#commentsListContainer);
     this.#renderedComments.set(commentData.id, commentComponent);
   };
 
   #renderComments = () => {
+    this.#commentsListContainer = this.#commentsSection.commentsListContainer;
+    if (this.#renderedComments.size) {
+      this.#renderedComments.forEach(
+        (comment, key, map) => {
+          remove(comment);
+          map.delete(key);
+        });
+    }
     const commentsSet = this.#commentsModel.comments;
     if (commentsSet.length){
       commentsSet.forEach((comment) => {this.#renderComment(comment);});
@@ -78,8 +90,16 @@ export default class FilmCommentsPresenter {
   };
 
   #renderCommentForm = () => {
-    render(this.#commentForm, this.#commentFormContainer);
-    this.#commentForm.setNewCommentEnter(this.#handleViewAction);
+    this.#commentFormContainer = this.#commentsSection.element;
+    this.#existCommentForm = this.#commentForm;
+    this.#commentForm = new FilmCommentFormView();
+    if (!this.#existCommentForm) {
+      render(this.#commentForm, this.#commentFormContainer);
+      this.#commentForm.setNewCommentEnter(this.#handleCommentsViewActions);
+      return;
+    }
+    replace(this.#commentForm, this.#existCommentForm);
+    remove(this.#existCommentForm);
   };
 
   #removeComment = (commentId) => {
@@ -87,40 +107,80 @@ export default class FilmCommentsPresenter {
     this.#renderedComments.delete(commentId);
   };
 
+  #removeCommentFromFilmData = (commentData) => {
+    const index = this.#film.comments.findIndex((comment) => comment === commentData);
+    this.#film.comments = [
+      ...this.#film.comments.slice(0, index),
+      ...this.#film.comments.slice(index + 1),
+    ];
+  };
+
   updateFilmInfo = (data) => {
     this.#film = data;
     this.#commentsSection.setCommentsCount(this.#film.comments.length);
   };
 
-  #handleModelEvent = async (updateType, data) => {
+  #setDeleting = (element) => {
+    element.updateElement({
+      isDeleting: true,
+    });
+  };
+
+  #setSaving = () => {
+    this.#commentForm.updateElement({
+      isSaving: true,
+    });
+  };
+
+  #setAborting = (element) => {
+    element.shake();
+  };
+
+  #handleModelEvent = (updateType, commentData) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        if (typeof data === 'string') {
-          this.#removeComment(data);
-          this.#filmsModel.updateFilmById(UpdateType.PATCH, this.#film.id);
+        if (commentData.movie) {
+          this.#renderComment(commentData.comments);
+          this.#commentForm.element.scrollIntoView(top);
+          this.#commentForm.reset();
+          this.#handleDetailsActions(UserAction.ADD_COMMENT, UpdateType.PATCH, commentData.movie);
           return;
         }
-        this.#renderComment(data);
-        this.#commentForm.element.scrollIntoView(top);
-        this.#filmsModel.updateFilmById(UpdateType.PATCH, this.#film.id);
+        this.#removeComment(commentData);
+        this.#removeCommentFromFilmData(commentData);
+        this.#handleDetailsActions(UserAction.DELETE_COMMENT, UpdateType.PATCH, this.#film);
         break;
       case UpdateType.MINOR:
         break;
       case UpdateType.MAJOR:
         break;
       case UpdateType.INIT:
+        this.#renderComentsSection();
         this.#renderComments();
+        this.#renderCommentForm();
         break;
     }
   };
 
-  #handleViewAction = (actionType, updateComment) => {
+  #handleCommentsViewActions = async (actionType, updateComment) => {
+    const commentElement = (UserAction.DELETE_COMMENT === actionType) ?
+      this.#renderedComments.get(updateComment.id) : '';
     switch (actionType) {
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(UpdateType.PATCH, this.#film, updateComment);
+        try {
+          this.#setSaving();
+          this.#commentsModel.addComment(UpdateType.PATCH, this.#film, updateComment);
+        } catch (err) {
+          this.#setAborting(this.#commentForm);
+        }
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(UpdateType.PATCH, updateComment);
+        try {
+          this.#setDeleting(commentElement);
+          this.#commentsModel.deleteComment(UpdateType.PATCH, updateComment);
+        } catch (err) {
+          this.#setAborting(commentElement);
+        }
         break;
     }
   };

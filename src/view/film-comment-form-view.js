@@ -1,17 +1,27 @@
-import { UserAction } from '../enum';
+import he from 'he';
+import { UserAction } from '../utils/enum';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 
 const EMOTION_PATH = './images/emoji/';
 
-const createFilmCommentFormTemplate = () => (
-  `<div class="film-details__new-comment">
-    <div class="film-details__add-emoji-label"></div>
+const createFilmCommentFormTemplate = (state) => {
+  const {
+    comment,
+    emotion,
+    isSaving,
+  } = state;
+
+  return (
+    `<div class="film-details__new-comment">
+    <div class="film-details__add-emoji-label ${isSaving ? 'disabled' : ''}">
+      ${(emotion) ? (`<src="images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">`) : ''}
+    </div>
 
     <label class="film-details__comment-label">
-      <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+      <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" ${isSaving ? 'disabled' : ''}>${comment ? he.encode(comment): ''}</textarea>
     </label>
 
-    <div class="film-details__emoji-list">
+    <div class="film-details__emoji-list"${isSaving ? 'disabled' : ''}>
       <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile">
       <label class="film-details__emoji-label" for="emoji-smile">
         <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
@@ -32,8 +42,8 @@ const createFilmCommentFormTemplate = () => (
         <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
       </label>
     </div>
-  </div>`
-);
+  </div>`);
+};
 
 export default class FilmCommentFormView extends AbstractStatefulView {
   _state = null;
@@ -43,15 +53,19 @@ export default class FilmCommentFormView extends AbstractStatefulView {
 
   constructor () {
     super();
-    this._state = {};
+    this._state = FilmCommentFormView.initState();
     this.#setInnerHandlers();
   }
 
   get template() {
-    return createFilmCommentFormTemplate();
+    return createFilmCommentFormTemplate(this._state);
   }
 
-  static initState = () => ({});
+  static initState = () => ({
+    isSaving: false,
+    comment: null,
+    emotion: null,
+  });
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
@@ -59,7 +73,12 @@ export default class FilmCommentFormView extends AbstractStatefulView {
 
   static convertStateToData = (state) => {
     const commentData =  {...state};
+    delete commentData.isSaving;
     return commentData;
+  };
+
+  reset = () => {
+    this.updateElement(FilmCommentFormView.initState());
   };
 
   setNewCommentEnter(callback) {
@@ -69,15 +88,13 @@ export default class FilmCommentFormView extends AbstractStatefulView {
 
   #newCommentEntertHandler = (evt) => {
     if ((evt.ctrlKey || evt.metaKey) && (evt.code === 'Enter' || evt.key === 'Enter')){
-      let commentData = FilmCommentFormView.convertStateToData(this._state);
-      if (commentData.emotion === undefined) {
+      const commentData = FilmCommentFormView.convertStateToData(this._state);
+      if (commentData.emotion === null || commentData.comment === null) {
+        this.shake();
         return;
       }
       evt.preventDefault();
-      this.updateElement(FilmCommentFormView.initState);
       this._callback.newCommentEnterKeydown(UserAction.ADD_COMMENT, commentData);
-      commentData = {};
-      this._state = {};
     }
   };
 
