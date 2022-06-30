@@ -69,10 +69,14 @@ export default class FilmCommentFormView extends AbstractStatefulView {
     this.updateElement(FilmCommentFormView.initState());
   };
 
-  setNewCommentEnter(callback) {
+  setEnterKeydownHandler(callback) {
     this._callback.newCommentEnterKeydown = callback;
     document.addEventListener('keydown', this.#newCommentEntertHandler);
   }
+
+  removeEnterKeydownHandler = () => {
+    document.removeEventListener('keydown', this.#newCommentEntertHandler);
+  };
 
   #newCommentEntertHandler = (evt) => {
     if ((evt.ctrlKey || evt.metaKey) && (evt.code === 'Enter' || evt.key === 'Enter')){

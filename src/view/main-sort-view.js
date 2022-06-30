@@ -17,12 +17,12 @@ export default class MainSortView extends AbstractView {
     return createMainSortTemplate();
   }
 
-  setSortTypeChangeHandler(callback) {
+  setSortTypeClickHandler(callback) {
     this._callback.sortTypeChange = callback;
-    this.element.addEventListener('click', this.#sortTypeChangeHandler);
+    this.element.addEventListener('click', this.#sortTypeClickHandler);
   }
 
-  #sortTypeChangeHandler = (evt) => {
+  #sortTypeClickHandler = (evt) => {
     if (!evt.target.classList.contains('sort__button')){
       return;
     }

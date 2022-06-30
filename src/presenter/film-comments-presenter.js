@@ -9,7 +9,6 @@ import { UpdateType, UserAction } from '../utils/enum';
 export default class FilmCommentsPresenter {
   static #instance = null;
   #film = null;
-  #filmsModel = null;
   #commentsModel = null;
   #renderedComments = new Map();
   #commentsSection = null;
@@ -40,16 +39,13 @@ export default class FilmCommentsPresenter {
     this.#clearCommentsSection();
   }
 
-  static get instance() {
-    return this.#instance;
-  }
-
   #clearCommentsSection = () => {
     this.#renderedComments.forEach(
       (comment, key, map) => {
         remove(comment);
         map.delete(key);
       });
+    this.#commentForm.removeEnterKeydownHandler();
     remove(this.#commentForm);
     remove(this.#commentsSection);
   };
@@ -95,7 +91,7 @@ export default class FilmCommentsPresenter {
     this.#commentForm = new FilmCommentFormView();
     if (!this.#existCommentForm) {
       render(this.#commentForm, this.#commentFormContainer);
-      this.#commentForm.setNewCommentEnter(this.#handleCommentsViewActions);
+      this.#commentForm.setEnterKeydownHandler(this.#handleCommentsViewActions);
       return;
     }
     replace(this.#commentForm, this.#existCommentForm);

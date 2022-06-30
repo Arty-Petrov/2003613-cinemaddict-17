@@ -31,7 +31,6 @@ const createCommentTemplate = (commentsData) => {
 };
 
 export default class FilmCommentView extends AbstractStatefulView {
-  #comment = null;
   #deleteCommentButton = null;
 
   constructor(commentData) {

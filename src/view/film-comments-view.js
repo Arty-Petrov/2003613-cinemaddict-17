@@ -14,9 +14,6 @@ const createFilmCommentsTemplate = (filmData) => {
 
 export default class FilmCommentsView extends AbstractView {
   #filmData = null;
-  commentsCountContainer = null;
-  #commentsContainer = null;
-  #commentFormContainer = null;
 
   constructor(filmData) {
     super();

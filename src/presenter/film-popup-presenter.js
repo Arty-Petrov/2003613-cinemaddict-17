@@ -60,11 +60,12 @@ export default class FilmPopupPresenter {
     this.#filmPopup = new FilmPopupView();
     if (!this.#existFilmPopup) {
       document.addEventListener('keydown', this.#handleEscKeydown);
-      this.#filmPopup.setCloseButtonHandler(this.#handleClosePopup);
+      this.#filmPopup.setCloseButtonClickHandler(this.#handleClosePopup);
       this.#filmPopupContainer.classList.toggle(BLOCK_SCROLL_CLASS);
       render(this.#filmPopup, this.#filmPopupContainer);
       return;
     }
+    this.#filmPopup.setCloseButtonClickHandler(this.#handleClosePopup);
     replace(this.#filmPopup, this.#existFilmPopup);
     remove(this.#existFilmPopup);
   };

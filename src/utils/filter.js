@@ -2,32 +2,38 @@ import dayjs from 'dayjs';
 import { FilterType } from '../utils/enum';
 import { getRandomArrayRange } from '../utils/util';
 
+const sortCommented = (a, b) =>  b.comments.length - a.comments.length;
+export const sortByDate = (a, b) => dayjs(b.filmInfo.release.date).diff(dayjs(a.filmInfo.release.date));
+export const sortByRating = (a, b) => parseFloat(b.filmInfo.totalRating) - parseFloat(a.filmInfo.totalRating);
+
 export const getTopRated = (films, count = 2) => {
-  const filmsToSort = [...films];
-  const unicValues = filmsToSort.filter((el, index, array) => array.indexOf(el.filmInfo.topRated) !== index);
-  const hasUnicValues = filmsToSort.length === unicValues.length;
-  if (hasUnicValues.length && hasUnicValues[0].comments.length === 0) {
+  const hasNoCommentedFilm = films.every((film) => film.filmInfo.totalRating === 0);
+  if (hasNoCommentedFilm) {
     return [];
   }
-  if (hasUnicValues.length === filmsToSort.length) {
+  const filmsToSort = [...films].sort(sortByRating);
+  const hasNoUnicValues = filmsToSort.every((film) => film.filmInfo.totalRating === filmsToSort[0].filmInfo.totalRating);
+  if (hasNoUnicValues) {
     return getRandomArrayRange(filmsToSort, count);
   }
-  const sortRated = (a, b) => b.filmInfo.totalRating - a.filmInfo.totalRating;
-  return filmsToSort.sort(sortRated).slice(0, count);
+
+  return filmsToSort.slice(0, count);
 };
 
 export const getMostCommented = (films, count = 2) => {
-  const filmsToSort = [...films];
-  const unicValues = filmsToSort.filter((el, index, array) => array.indexOf(el.comments.length) !== index);
-  const hasUnicValues = filmsToSort.length === unicValues.length;
-  if (hasUnicValues.length && hasUnicValues[0].comments.length === 0) {
+  const hasNoCommentedFilm = films.every((film) => film.comments.length === 0);
+  if (hasNoCommentedFilm) {
     return [];
   }
-  if (hasUnicValues.length === filmsToSort.length) {
+
+  const filmsToSort = [...films].sort(sortCommented);
+  const hasNoUnicValues = filmsToSort.every((film) => film.comments.length === filmsToSort[0].comments.length);
+
+  if (hasNoUnicValues) {
     return getRandomArrayRange(filmsToSort, count);
   }
-  const sortCommented = (a, b) =>  b.comments.length - a.comments.length;
-  return filmsToSort.sort(sortCommented).slice(0, count);
+
+  return filmsToSort.slice(0, count);
 };
 
 export const filter = {
@@ -36,6 +42,3 @@ export const filter = {
   [FilterType.HISTORY]: (films) => films.filter((film) => film.userDetails.alreadyWatched),
   [FilterType.FAVORITES]: (films) => films.filter((film) => film.userDetails.favorite),
 };
-
-export const sortByDate = (a, b) => dayjs(b.filmInfo.release.date).diff(dayjs(a.filmInfo.release.date));
-export const sortByRating = (a, b) => parseFloat(b.filmInfo.totalRating) - parseFloat(a.filmInfo.totalRating);

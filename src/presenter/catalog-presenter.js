@@ -94,11 +94,11 @@ export default class CatalogPresenter {
     const filteredFilms = filter[this.#filterType](films);
     switch (this.#currentSortType) {
       case SortType.DATE:
-        return [...filteredFilms].sort(sortByDate);
+        return filteredFilms.sort(sortByDate);
       case SortType.RATING:
-        return [...filteredFilms].sort(sortByRating);
+        return filteredFilms.sort(sortByRating);
       default:
-        return [...filteredFilms];
+        return filteredFilms;
     }
   }
 
@@ -168,7 +168,7 @@ export default class CatalogPresenter {
   #renderFilmsSortMenu = () => {
     if (this.#filmsData.length) {
       render(this.#filmsSortMenu, this.#filmsList.element, RenderPosition.BEFOREBEGIN);
-      this.#filmsSortMenu.setSortTypeChangeHandler(this.#handleSortTypeChange);
+      this.#filmsSortMenu.setSortTypeClickHandler(this.#handleSortTypeChange);
     }
   };
 
@@ -195,7 +195,7 @@ export default class CatalogPresenter {
       this.#renderFilmCard(this.#filmsData[i], FilmLists.CATALOG, this.#filmsList.container);
     }
     if (filmsCount > this.#renderedFilmsCount) {
-      this.#showMoreButton.init(this.#filmsList.element, this.#handleShowMoreButton);
+      this.#showMoreButton.init(this.#filmsList.container, this.#handleShowMoreButton);
     }
   };
 
@@ -249,9 +249,15 @@ export default class CatalogPresenter {
 
   #upadateMostCommentedList = (updateData) => {
     const renderedMostCommented = [...this.#renderedFilms[FilmLists.MOST_COMMENTED]];
-    const index = renderedMostCommented.findIndex((film) => film.id === updateData.id);
+    const mostCommentedData = ExtraFilmsLists[FilmLists.MOST_COMMENTED].films;
 
-    if (index) {
+    const hasUpdatedFilm = renderedMostCommented.some((film) => film[0] === updateData.id);
+    const hasBiggestCommentsCount = mostCommentedData.some((film) => film.comments.length < updateData.comments.length);
+
+    if (hasUpdatedFilm || hasBiggestCommentsCount) {
+      this.#filmsData = this.films;
+      ExtraFilmsLists[FilmLists.MOST_COMMENTED].films = getMostCommented(this.#filmsData);
+      this.#removeTopRatedFilmsSection(FilmLists.MOST_COMMENTED);
       this.#renderTopRatedFilmsSection(FilmLists.MOST_COMMENTED);
     }
   };
@@ -272,7 +278,6 @@ export default class CatalogPresenter {
         this.#renderedFilms[filmList].get(updateData.id)[filmCardMethod](payload);
       }
     }
-
   };
 
   #handleShowMoreButton = () => {
@@ -321,8 +326,8 @@ export default class CatalogPresenter {
     }
     const filmsCount = this.#filmsData.length;
     const currentUpdateType = updateType;
+    this.#renderedFilmsCount = FILMS_COUNT_PER_STEP;
     if (currentUpdateType === UpdateType.MAJOR || !(filmsCount > 0)) {
-      this.#renderedFilmsCount = FILMS_COUNT_PER_STEP;
       remove(this.#filmsSortMenu);
     }
   };
@@ -331,7 +336,7 @@ export default class CatalogPresenter {
     switch (updateType) {
       case UpdateType.PATCH:
         this.#setFilmCards(FilmCardMethod.UPDATE, updateData, updateData);
-        this.#renderTopRatedFilms();
+        this.#upadateMostCommentedList(updateData);
         break;
       case UpdateType.MINOR:
         this.#filmsData = this.films;

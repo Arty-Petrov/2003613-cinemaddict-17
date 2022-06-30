@@ -1,5 +1,3 @@
-export const DATA_LENGTH = 30;
-
 export const CommentEmotion = {
   smile: {
     img: 'smile.png',
@@ -17,16 +15,6 @@ export const CommentEmotion = {
     img: 'angry.png',
     alt: 'emoji-angry',
   },
-};
-
-export const AuthorizationError = {
-  error: '401',
-  message: 'Header Authorization is not correct',
-};
-
-export const NotFoundError = {
-  error: '404',
-  message: 'Not found',
 };
 
 export const FilterType = {
